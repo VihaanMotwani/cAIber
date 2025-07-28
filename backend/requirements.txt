@@ -1,0 +1,14 @@
+fastapi
+uvicorn[standard]
+python-dotenv
+neo4j
+pydantic
+
+langchain
+langchain-experimental
+langchain-community
+langchain-openai
+
+pypdf
+markdown2
+python-multipart
