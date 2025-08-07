@@ -10,7 +10,7 @@ load_dotenv()
 app = FastAPI(
     title="cAIber API",
     description="Backend services for the cAIber Threat Intelligence Platform.",
-    version="0.5.0" # Version bump for the refactor!
+    version="0.5.0"
 )
 
 @app.on_event("startup")
