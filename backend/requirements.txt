@@ -12,3 +12,5 @@ langchain-openai
 pypdf
 markdown2
 python-multipart
+requests
+stix2
