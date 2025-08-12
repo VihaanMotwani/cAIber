@@ -30,6 +30,7 @@ class BaseAgent:
     def run(self):
         print(f"INFO: Running {self.__class__.__name__}...")
         raw_data = self.collect()
+        structured_intelligence = []
         if raw_data:
             structured_intelligence = self.process(raw_data)
             print(f"SUCCESS: Collected {len(structured_intelligence)} relevant intelligence items.")
@@ -37,6 +38,8 @@ class BaseAgent:
                 print(json.dumps(item, indent=2))
         else:
             print("INFO: No new data collected.")
+
+        return structured_intelligence
 
 class OTXAgent(BaseAgent):
     def __init__(self, api_key):

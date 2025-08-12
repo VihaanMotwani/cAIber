@@ -86,7 +86,8 @@ async def process_text_to_graph(text: str = Body(..., embed=True)):
 @app.post("/run-collection-agent", status_code=200)
 async def run_collection_agent():
     """
-    Triggers the AI-powered collection agent to fetch and process threat intelligence.
+    Triggers the AI-powered collection agent and returns the
+    filtered, structured threat intelligence.
     """
     otx_api_key = os.getenv("OTX_API_KEY")
     if not otx_api_key:
@@ -94,10 +95,11 @@ async def run_collection_agent():
 
     try:
         agent = OTXAgent(api_key=otx_api_key)
-        agent.run()
-        # In a real application, you would return the collected data
-        # or a confirmation message with a job ID.
-        return {"message": "Collection agent run initiated successfully."}
+        collected_data = agent.run() 
+        return {
+            "message": f"Collection agent run completed. Found {len(collected_data)} items.",
+            "intelligence": collected_data
+        }
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"An error occurred: {str(e)}")
 
