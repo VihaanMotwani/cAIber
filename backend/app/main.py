@@ -6,6 +6,7 @@ from .services.dna_engine import get_db, close_db, add_graph_to_db
 from .services.llm_graph_generator import extract_graph_from_text
 from .services.file_processor import extract_text_from_file
 from .services.collection_agent import OTXAgent
+from .services.pir_generator import generate_pirs
 
 load_dotenv()
 
@@ -101,6 +102,19 @@ async def run_collection_agent():
             "intelligence": collected_data
         }
     except Exception as e:
+        raise HTTPException(status_code=500, detail=f"An error occurred: {str(e)}")
+
+@app.get("/generate-pirs", status_code=200)
+async def get_priority_intelligence_requirements():
+    """
+    Analyzes the knowledge graph to generate and return
+    Priority Intelligence Requirements (PIRs).
+    """
+    try:
+        pirs = generate_pirs()
+        return {"pirs": pirs}
+    except Exception as e:
+        # In a real app, you'd log the error
         raise HTTPException(status_code=500, detail=f"An error occurred: {str(e)}")
 
 @app.get("/")

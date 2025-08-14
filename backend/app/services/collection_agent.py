@@ -1,25 +1,56 @@
 import requests
 from stix2 import Indicator
 import json
-from ..services.dna_engine import get_db # Import the existing db engine
+from langchain_openai import ChatOpenAI
+
+llm = ChatOpenAI(temperature=0, model_name="gpt-4o")
 
 class BaseAgent:
     def __init__(self):
-        self.db = get_db()
-        self.dna_keywords = self._get_dna_keywords()
+        # --- THE LOGIC HERE IS COMPLETELY NEW ---
+        self.dna_keywords = self._get_keywords_from_pirs()
+        # --- END OF NEW LOGIC ---
 
-    def _get_dna_keywords(self):
+    def _get_keywords_from_pirs(self):
         """
-        Queries the Neo4j database to get keywords from the 'Organizational DNA'.
-        This is the integration point with Stage 1.
+        Fetches PIRs from the API and uses an LLM to extract
+        actionable keywords for threat hunting.
         """
-        print("INFO: Fetching keywords from Organizational DNA...")
-        # This is a sample query. You can make it more sophisticated.
-        query = "MATCH (n) RETURN n.id AS keyword"
-        results = self.db.query(query)
-        keywords = {record["keyword"] for record in results if record["keyword"]}
-        print(f"INFO: Loaded {len(keywords)} keywords from DNA.")
-        return keywords
+        print("INFO: Fetching PIRs from the cAIber API...")
+        try:
+            # Assumes the app is running on localhost:8000
+            response = requests.get("http://127.0.0.1:8000/generate-pirs")
+            response.raise_for_status()
+            pirs_text = response.json().get("pirs", {}).get("result", "")
+
+            if not pirs_text:
+                print("WARNING: No PIRs were generated. Falling back to generic keywords.")
+                return {"threat", "vulnerability", "malware"}
+
+            print(f"INFO: Generated PIRs:\n{pirs_text}")
+
+            print("INFO: Using LLM to extract keywords from PIRs...")
+            # Use the LLM to "translate" the PIRs into search terms
+            prompt = f"""
+            From the following threat intelligence requirements, extract a list of no more than 10 critical, specific, and searchable keywords.
+            Focus on technologies, threat actor types, regions, and targeted assets.
+            Return the keywords as a single, comma-separated string.
+
+            Requirements:
+            "{pirs_text}"
+
+            Keywords:
+            """
+            response = llm.invoke(prompt)
+            keywords_str = response.content
+            keywords = {kw.strip().lower() for kw in keywords_str.split(',')}
+
+            print(f"INFO: Extracted keywords for collection: {keywords}")
+            return keywords
+
+        except requests.exceptions.RequestException as e:
+            print(f"ERROR: Could not fetch PIRs. {e}")
+            return {"threat", "vulnerability", "malware"} # Fallback keywords
 
     def collect(self):
         raise NotImplementedError
