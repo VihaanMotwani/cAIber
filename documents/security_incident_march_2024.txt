@@ -1,0 +1,4 @@
+SECURITY INCIDENT REPORT – INC-2024-0315
+Threat actor: APT29 (Cozy Bear). Vector: SQL injection against /api/v1/customer/login.
+Attempted access to AWS S3, EC2 and PostgreSQL; lateral movement within Kubernetes.
+Primary vulnerability: CVE-2024-1234 in Spring Boot. Status: Contained. Actions: WAF rules updated.

@@ -1,0 +1,4 @@
+Compliance Framework 2024
+Regimes: GDPR, MAS TRM, SOC 2 Type II, PCI DSS, ISO 27001.
+Data localization for Singapore (ap-southeast-1). Encryption at rest & transit (AES-256).
+Quarterly training; vendor reviews for AWS, Azure, Stripe, Auth0.

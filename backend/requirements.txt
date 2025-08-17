@@ -8,9 +8,13 @@ langchain
 langchain-experimental
 langchain-community
 langchain-openai
+langchain-neo4j
 
 pypdf
 markdown2
 python-multipart
 requests
 stix2
+spacy
+tiktoken
+doc2txt

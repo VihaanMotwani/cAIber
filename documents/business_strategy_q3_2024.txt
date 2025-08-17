@@ -1,0 +1,4 @@
+ACME – Q3 2024 Strategic Plan
+We will expand into Southeast Asia (Singapore, Malaysia) with a mobile banking app.
+Tech stack: AWS EC2, AWS S3, Kubernetes, PostgreSQL, Redis, React Native, Docker, JWT, AWS WAF.
+Targets: 15% regional share in 18 months; MAS compliance required.

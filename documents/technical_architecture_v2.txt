@@ -1,0 +1,4 @@
+System Architecture v2.1
+Cloud: AWS (us-east-1), Azure (Southeast Asia). Kubernetes 1.28 + Istio, Kafka, Prometheus, Grafana.
+Datastores: PostgreSQL + PgBouncer, Redis Cluster, MongoDB. CI/CD via ArgoCD and Docker.
+Identity: Auth0. Payments: Stripe. Observability: Splunk, CloudWatch, DataDog.
