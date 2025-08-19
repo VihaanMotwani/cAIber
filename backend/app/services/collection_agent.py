@@ -2,6 +2,8 @@ import requests
 from stix2 import Indicator, Vulnerability
 import json
 from langchain_openai import ChatOpenAI
+from dotenv import load_dotenv
+load_dotenv()
 from datetime import datetime, timedelta
 from typing import List, Dict, Any
 
