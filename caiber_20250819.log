@@ -1,0 +1,4 @@
+2025-08-19 21:01:36,385 - cAIber - INFO - Initializing Autonomous Correlation Agent
+2025-08-19 21:01:38,010 - cAIber - ERROR - Agent failed for CVE-2024-1234: Cannot resolve address 786f0e42.databases.neo4j.io:7687
+2025-08-19 21:05:37,313 - cAIber - INFO - Initializing Autonomous Correlation Agent
+2025-08-19 21:05:37,321 - cAIber - WARNING - Neo4j not available, using mock data: Cannot resolve address 786f0e42.databases.neo4j.io:7687
