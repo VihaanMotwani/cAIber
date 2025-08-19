@@ -27,7 +27,7 @@ class PIRGenerator:
         # Initialize Neo4j graph connection
         try:
             self.graph = Neo4jGraph(
-                url=os.getenv("NEO4J_URI", "neo4j+s://cc633ab6.databases.neo4j.io"),
+                url=os.getenv("NEO4J_URI", "neo4j+s://786f0e42.databases.neo4j.io"),
                 username=os.getenv("NEO4J_USERNAME", "neo4j"),
                 password=os.getenv("NEO4J_PASSWORD", "password")
             )
