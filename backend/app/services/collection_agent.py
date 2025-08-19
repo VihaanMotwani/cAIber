@@ -2,6 +2,8 @@ import requests
 from stix2 import Indicator
 import json
 from langchain_openai import ChatOpenAI
+from dotenv import load_dotenv
+load_dotenv()
 
 llm = ChatOpenAI(temperature=0, model_name="gpt-4o")
 

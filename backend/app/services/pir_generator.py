@@ -31,7 +31,7 @@ particularly those exploiting supply chain vulnerabilities."
 Now, analyze the provided graph data and generate the PIRs.
 """
 
-def generate_pirs() -> dict:
+def generate_pirs_test() -> dict:
     """
     Analyzes the entire knowledge graph to generate Priority Intelligence Requirements (PIRs).
     
