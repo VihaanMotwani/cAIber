@@ -1,0 +1,19 @@
+2025-08-20 00:16:09,008 - cAIber - INFO - Initializing Correlation Agent
+2025-08-20 00:16:09,519 - cAIber - INFO - Starting threat correlation analysis
+2025-08-20 00:16:09,740 - cAIber - INFO - Correlating 58 vulnerabilities
+2025-08-20 00:16:43,075 - cAIber - INFO - Correlating 16178 threat indicators
+2025-08-20 00:17:17,695 - cAIber - INFO - Generated 0 risk assessments
+2025-08-20 00:23:00,650 - cAIber - INFO - Initializing Autonomous Correlation Agent
+2025-08-20 00:23:01,074 - cAIber - INFO - Connected to Neo4j
+2025-08-20 00:23:01,142 - cAIber - INFO - Starting autonomous threat correlation
+2025-08-20 00:23:01,143 - cAIber - INFO - Assessing vulnerability: CVE-2007-0671
+2025-08-20 00:23:05,721 - cAIber - INFO - Assessing vulnerability: CVE-2013-3893
+2025-08-20 00:23:14,956 - cAIber - INFO - Assessing vulnerability: CVE-2014-9188
+2025-08-20 00:23:21,029 - cAIber - INFO - Assessing vulnerability: CVE-2015-0740
+2025-08-20 00:23:27,691 - cAIber - INFO - Assessing vulnerability: CVE-2015-4274
+2025-08-20 00:23:34,037 - cAIber - INFO - Assessing indicator: MaaS operation using Emmenhtal and Amadey linked to threats against Ukrainian entities
+2025-08-20 00:23:42,907 - cAIber - INFO - Assessing indicator: MaaS operation using Emmenhtal and Amadey linked to threats against Ukrainian entities
+2025-08-20 00:23:47,642 - cAIber - INFO - Assessing indicator: MaaS operation using Emmenhtal and Amadey linked to threats against Ukrainian entities
+2025-08-20 00:23:57,262 - cAIber - INFO - Assessing indicator: MaaS operation using Emmenhtal and Amadey linked to threats against Ukrainian entities
+2025-08-20 00:24:02,611 - cAIber - INFO - Assessing indicator: MaaS operation using Emmenhtal and Amadey linked to threats against Ukrainian entities
+2025-08-20 00:24:07,445 - cAIber - INFO - Completed autonomous assessment: 0 risks identified

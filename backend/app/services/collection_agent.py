@@ -33,13 +33,29 @@ class OTXAgent(BaseAgent):
         self.base_url = "https://otx.alienvault.com/api/v1/pulses/subscribed"
 
     def collect(self):
-        """Collects recent threat pulses from AlienVault OTX."""
+        """Collects recent threat pulses from AlienVault OTX and prints the date range."""
         print("INFO: Collecting data from AlienVault OTX...")
         headers = {'X-OTX-API-KEY': self.api_key}
         try:
             response = requests.get(self.base_url, headers=headers, params={'limit': 50})
             response.raise_for_status()
-            return response.json().get('results', [])
+            results = response.json().get('results', [])
+
+            if not results:
+                print("WARNING: No pulses returned.")
+                return None
+
+            # Extract created dates
+            dates = [datetime.fromisoformat(pulse['created'].replace('Z', '+00:00')) 
+                     for pulse in results if 'created' in pulse]
+
+            if dates:
+                print(f"INFO: Feed covers from {min(dates)} to {max(dates)} "
+                      f"({(max(dates)-min(dates)).days} days span)")
+            else:
+                print("WARNING: No 'created' dates found in pulses.")
+
+            return results
         except requests.exceptions.RequestException as e:
             print(f"ERROR: Could not collect data from OTX. {e}")
             return None

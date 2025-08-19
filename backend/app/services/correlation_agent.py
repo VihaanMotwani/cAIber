@@ -8,7 +8,7 @@ from typing import Dict, Any, List
 from neo4j import GraphDatabase
 from langchain_openai import ChatOpenAI
 from dotenv import load_dotenv
-from logger_config import logger
+from .logger_config import logger
 
 load_dotenv()
 
