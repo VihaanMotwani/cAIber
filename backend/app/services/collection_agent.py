@@ -6,7 +6,6 @@ from dotenv import load_dotenv
 load_dotenv()
 from datetime import datetime, timedelta
 from typing import List, Dict, Any
-
 llm = ChatOpenAI(temperature=0, model_name="gpt-4o")
 
 class BaseAgent:
@@ -197,7 +196,7 @@ class CVEAgent(BaseAgent):
 class GitHubSecurityAgent(BaseAgent):
     """GitHub Security Advisories for open source vulnerabilities"""
     
-    def __init__(self, github_token='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'):
+    def __init__(self, github_token=None): #hardcode it here 
         super().__init__()
         self.github_token = github_token  # GitHub personal access token (optional)
         self.base_url = "https://api.github.com/graphql"
