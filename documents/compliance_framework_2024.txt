@@ -1,4 +1,29 @@
-Compliance Framework 2024
-Regimes: GDPR, MAS TRM, SOC 2 Type II, PCI DSS, ISO 27001.
-Data localization for Singapore (ap-southeast-1). Encryption at rest & transit (AES-256).
-Quarterly training; vendor reviews for AWS, Azure, Stripe, Auth0.
+Acme Financial Services – Compliance Framework 2024
+
+Certifications & Standards:
+- ISO/IEC 27001:2013 – Certified since 2021, surveillance audit due Nov 2024.
+- SOC 2 Type II – Renewal audit scheduled Dec 2024.
+- PCI-DSS v4.0 – Required for all cardholder data environments (CDE).
+- MAS TRM Guidelines – Applicable to SG operations.
+- GDPR (EU customers) & PDPA (SG, MY) – Active.
+
+Regulatory Bodies & Jurisdictions:
+- Monetary Authority of Singapore (MAS)
+- Bank Negara Malaysia (BNM)
+- EU GDPR Supervisory Authorities
+
+Control Mappings (sample):
+- Access Control: IAM via Okta, mapped to ISO 27001 A.9, PCI-DSS 7.2.
+- Cryptography: TLS 1.3 enforced, AES-256 at rest, mapped to ISO 27001 A.10.
+- Logging/Monitoring: Splunk SIEM, retention 1 year, mapped to SOC 2 CC7.2.
+- Incident Management: SOC playbooks, mapped to ISO 27001 A.16, MAS TRM 13.2.
+
+Outstanding Gaps:
+- Data residency: MongoDB Atlas clusters in Singapore not fully MAS TRM compliant.
+- Vendor risk: Redis Labs enterprise support contract under review.
+- Audit finding (2023): Privilege escalation controls in CI/CD pipelines weak.
+
+Planned Improvements:
+- Deploy DLP for Office365 (Q3 2024).
+- Shift SIEM from Splunk to Elastic to reduce cost and improve ingestion scale.
+- Annual red-team exercise scheduled Oct 2024.

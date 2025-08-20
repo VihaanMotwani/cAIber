@@ -1,4 +1,28 @@
-SECURITY INCIDENT REPORT – INC-2024-0315
-Threat actor: APT29 (Cozy Bear). Vector: SQL injection against /api/v1/customer/login.
-Attempted access to AWS S3, EC2 and PostgreSQL; lateral movement within Kubernetes.
-Primary vulnerability: CVE-2024-1234 in Spring Boot. Status: Contained. Actions: WAF rules updated.
+Incident Report: Unauthorized Access via Exploited CVE-2023-4966
+
+Date: 14–17 March 2024
+Severity: High
+Business Impact: Unauthorized access to dev cluster; no PII exfiltration confirmed.
+
+Timeline:
+- 14 Mar, 09:22 SGT – IDS alert for suspicious traffic from external IP (45.77.x.x).
+- 14 Mar, 09:35 – SOC triage confirms exploitation attempt on Citrix ADC gateway.
+- 14 Mar, 10:10 – Attacker gains foothold on dev subnet via CVE-2023-4966 (Citrix Bleed).
+- 14 Mar, 12:05 – Lateral movement attempt to AWS ECS cluster detected (stopped by IAM policy).
+- 15 Mar – Forensics confirm persistence mechanism via scheduled tasks.
+- 17 Mar – Eradication completed, vulnerable Citrix patched to 13.1-48.47.
+
+Root Cause:
+- Unpatched Citrix appliance in MY1 datacenter.
+- Lack of timely patch validation for appliances outside SG1.
+
+Indicators of Compromise (IOCs):
+- External IP: 45.77.112.34
+- Hashes: SHA256 d2a5e3… (webshell uploaded)
+- MITRE ATT&CK: T1190 (Exploit Public-Facing App), T1078 (Valid Accounts).
+
+Remediation:
+- Patched Citrix fleet globally.
+- Deployed Citrix ADM monitoring.
+- Updated patch SLAs from 30d → 14d.
+- Threat intel monitoring for APT29 (linked to similar exploit chains).

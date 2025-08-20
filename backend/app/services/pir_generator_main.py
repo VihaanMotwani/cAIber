@@ -27,7 +27,7 @@ class PIRGenerator:
         # Initialize Neo4j graph connection
         try:
             self.graph = Neo4jGraph(
-                url=os.getenv("NEO4J_URI", "neo4j+s://786f0e42.databases.neo4j.io"),
+                url=os.getenv("NEO4J_URI"),
                 username=os.getenv("NEO4J_USERNAME", "neo4j"),
                 password=os.getenv("NEO4J_PASSWORD", "password")
             )
@@ -139,12 +139,20 @@ class PIRGenerator:
                 return {"error": "Knowledge graph validation failed"}
             
             print("\n🧠 Analyzing organizational context and generating PIRs...")
-            result = self.chain.invoke(self.PIR_GENERATION_PROMPT)
+            context = self.get_context_summary()
+            result = self.llm.invoke(f"{self.PIR_GENERATION_PROMPT}\n\nContext:\n{context}")
+
+            pir_text = result.content if hasattr(result, "content") else str(result)
+
+            # Extract keywords via LLM
+            keywords = self.extract_keywords(pir_text)
             
             print("\n✅ PIR Generation Successful!")
+            
             return {
                 "success": True,
-                "pirs": result,
+                "pirs": pir_text,
+                "keywords": keywords,
                 "timestamp": __import__('datetime').datetime.now().isoformat()
             }
             
@@ -156,6 +164,40 @@ class PIRGenerator:
                 "timestamp": __import__('datetime').datetime.now().isoformat()
             }
     
+    def extract_keywords(self, pir_text: str) -> dict:
+        """
+        Use LLM to extract clean keywords from PIR text.
+        Returns a JSON with categories like technologies, geographies, threats, etc.
+        """
+        prompt = f"""
+        Extract the most important keywords from the following Priority Intelligence Requirements (PIRs).
+        Categorize them under: technologies, geographies, business_initiatives, and threat_actors.
+
+        PIR text:
+        {pir_text}
+
+        Return the result strictly in JSON format like this:
+        {{
+            "technologies": ["AWS", "Azure", "Kubernetes"],
+            "geographies": ["Southeast Asia"],
+            "business_initiatives": ["Cloud Expansion"],
+            "threat_actors": ["APT29"]
+        }}
+        """
+
+        response = self.llm.invoke(prompt)
+
+        try:
+            # Sometimes LLM wraps JSON in text — extract safely
+            import json, re
+            match = re.search(r"\{.*\}", response.content, re.DOTALL)
+            if match:
+                return json.loads(match.group(0))
+        except Exception:
+            pass
+
+        return {"technologies": [], "geographies": [], "business_initiatives": [], "threat_actors": []}
+
     def get_context_summary(self) -> Dict[str, Any]:
         """Get a summary of organizational context for PIR generation."""
         try:

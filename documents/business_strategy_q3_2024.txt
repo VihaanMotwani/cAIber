@@ -1,4 +1,33 @@
-ACME – Q3 2024 Strategic Plan
-We will expand into Southeast Asia (Singapore, Malaysia) with a mobile banking app.
-Tech stack: AWS EC2, AWS S3, Kubernetes, PostgreSQL, Redis, React Native, Docker, JWT, AWS WAF.
-Targets: 15% regional share in 18 months; MAS compliance required.
+Acme Financial Services – Business Strategy, Q3 2024
+
+Executive Summary:
+Acme is entering an aggressive digital transformation phase with an emphasis on 
+expanding our fintech product suite across Southeast Asia. The primary goals 
+are customer growth in Malaysia and Singapore, securing partnerships with 
+regional banks, and expanding into cloud-native offerings.
+
+Key Strategic Initiatives:
+1. Digital Banking Expansion
+   - Launch of mobile-first retail banking app in Malaysia (target Q4 2024).
+   - Integration with regional payment rails: PayNow (SG), DuitNow (MY).
+   - Cloud-native microservices backend on AWS Singapore and Azure Malaysia.
+
+2. Strategic Partnerships
+   - Ongoing MOU discussions with CIMB (MY) and DBS (SG) for co-branded products.
+   - Targeting partnerships with Visa/Mastercard for secure payments expansion.
+
+3. Cybersecurity and Resilience
+   - Priority investment into zero-trust network architecture by Q2 2025.
+   - SOC expansion from 10 FTE → 20 FTE in 12 months.
+   - Dedicated CTI (Cyber Threat Intel) function by end of Q4 2024.
+
+4. Growth Targets
+   - Q3 ARR target: USD 120M (+15% QoQ growth).
+   - Geographic revenue mix: 45% SG, 35% MY, 20% Rest of SEA.
+   - Cost optimization: migrate 40% of workloads from legacy DCs to cloud.
+
+Risks and Dependencies:
+- Dependence on regional regulators (MAS, BNM) for product approval.
+- High competition from Grab Financial, SeaMoney.
+- Cloud compliance for PCI-DSS, ISO 27001, and MAS TRM.
+
