@@ -11,6 +11,7 @@ from .organisational_dna_builder import OrganizationalDNAEngine
 from .pir_generator_main import PIRGenerator
 from .collection_agent import OTXAgent, CVEAgent, GitHubSecurityAgent, ThreatLandscapeBuilder
 from .correlation_agent import CorrelationAgent
+from .threat_modeling import generate_threat_model
 from langchain_openai import ChatOpenAI
 from .logger_config import logger
 
@@ -127,12 +128,23 @@ def run_pipeline(skip_stage1=False, autonomous_correlation=False):
         total_time = time.time() - start_time
         logger.info(f"Pipeline completed successfully in {total_time:.2f}s")
         
-        return {
+        intelligence_data =  {
             "pirs": pirs_text,
             "keywords": keywords,
             "threat_landscape": threat_landscape,
             "risk_assessments": risk_assessments,
             "executive_summary": executive_summary
+        }
+
+        threat_model = generate_threat_model(intelligence_data)
+
+        return {
+            "pirs": pirs_text,
+            "keywords": keywords,
+            "threat_landscape": threat_landscape,
+            "risk_assessments": risk_assessments,
+            "executive_summary": executive_summary,
+            "threat_model": threat_model
         }
         
     except Exception as e:

@@ -11,6 +11,7 @@ from .services.collection_agent import (
 from .services.autonomous_correlation_agent import AutonomousCorrelationAgent
 from .services.pir_generator_main import PIRGenerator
 from .services.simple_pipeline import run_pipeline
+from .services.threat_modeling import generate_threat_model
 
 load_dotenv()
 
@@ -148,7 +149,21 @@ def correlate_threats(threat_landscape: dict):
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
 
-
+@app.post("/generate-threat-model", status_code=200)
+async def get_comprehensive_threat_model(intelligence_data: dict = Body(...)):
+    """
+    Accepts a full intelligence package and returns a comprehensive,
+    methodology-driven threat model with all plausible attack paths.
+    """
+    try:
+        model_data = generate_threat_model(intelligence_data)
+        return {
+            "message": f"Comprehensive threat model generated successfully with {len(model_data.get('attack_paths', []))} path(s).",
+            "model": model_data
+        }
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"An error occurred: {str(e)}")
+    
 # ================================
 # Orchestrator: Run all stages
 # ================================
