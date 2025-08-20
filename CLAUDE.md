@@ -10,6 +10,7 @@ cAIber is an AI-powered threat intelligence platform that transforms reactive cy
 1. **Stage 1**: Organizational DNA → PIR Generation ✅
 2. **Stage 2**: PIR Keywords → Threat Collection (OTX, CVE, GitHub) ✅  
 3. **Stage 3**: Threat Correlation with Business Context ✅
+4. **Stage 4**: Comprehensive Threat Modeling with Attack Paths ✅
 
 ## System Architecture
 
@@ -37,6 +38,13 @@ cAIber is an AI-powered threat intelligence platform that transforms reactive cy
   - find_related_entities
   - get_business_initiatives
 - **Mock Data Support**: Works without Neo4j for testing/demo
+
+### Stage 4: Threat Modeling ✅ COMPLETE
+- **Comprehensive Analysis** (`threat_modeling.py`): Advanced threat modeling engine
+- **Attack Path Generation**: Step-by-step attack sequences
+- **MITRE ATT&CK Mapping**: Tactics and techniques classification
+- **STRIDE Classification**: Security threat categorization
+- **LLM-Powered**: GPT-4o for intelligent threat analysis
 
 ## Pipeline Implementation
 
@@ -102,12 +110,21 @@ python -c "from simple_pipeline import run_pipeline; run_pipeline(skip_stage1=Tr
 3. Real-time threat monitoring
 
 ### API Endpoints (main.py)
-```python
-@app.post("/api/analyze")
-async def analyze():
-    results = run_pipeline(skip_stage1=True)
-    return results
-```
+- `GET /generate-pirs` - Generate Priority Intelligence Requirements
+- `POST /collect-threats` - Run threat collection agents
+- `POST /correlate-threats` - Correlate threats with org DNA  
+- `POST /collect-and-correlate` - Combined collection + correlation
+- `POST /run-all` - Execute complete 4-stage pipeline
+
+### Frontend (NEW)
+- **Framework**: React + Vite
+- **Visualization**: D3.js, Three.js for 3D graphics
+- **Design**: Futuristic dark theme with cyber aesthetics
+- **Features**: 
+  - Real-time pipeline monitoring
+  - Interactive threat visualizations
+  - Attack path explorer
+  - Risk assessment dashboard
 
 ## Demo Talking Points
 1. **One-click analysis** - Complete threat assessment in under 2 minutes
