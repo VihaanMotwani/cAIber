@@ -46,7 +46,7 @@ export const api = {
 
   // Full Pipeline
   runFullPipeline: async () => {
-    const response = await apiClient.post('/run-all')
+    const response = await apiClient.post('/run-complete-pipeline')
     return response.data
   },
 }

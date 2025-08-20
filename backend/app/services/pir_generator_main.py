@@ -6,7 +6,7 @@ cAIber Stage 2 - Priority Intelligence Requirements Generation
 import os
 from typing import Dict, Any
 from langchain_openai import ChatOpenAI
-from langchain.chains import GraphCypherQAChain
+from langchain_neo4j import GraphCypherQAChain
 from langchain_neo4j import Neo4jGraph
 from neo4j import GraphDatabase
 from dotenv import load_dotenv
