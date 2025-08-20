@@ -7,12 +7,12 @@ import time
 from dotenv import load_dotenv
 load_dotenv()
 
-from organisational_dna_builder import OrganizationalDNAEngine
-from pir_generator_main import PIRGenerator
-from collection_agent import OTXAgent, CVEAgent, GitHubSecurityAgent, ThreatLandscapeBuilder
-from correlation_agent import CorrelationAgent
+from .organisational_dna_builder import OrganizationalDNAEngine
+from .pir_generator_main import PIRGenerator
+from .collection_agent import OTXAgent, CVEAgent, GitHubSecurityAgent, ThreatLandscapeBuilder
+from .correlation_agent import CorrelationAgent
 from langchain_openai import ChatOpenAI
-from logger_config import logger
+from .logger_config import logger
 
 llm = ChatOpenAI(temperature=0, model_name="gpt-4o")
 
@@ -47,7 +47,12 @@ def run_pipeline(skip_stage1=False, autonomous_correlation=False):
             # Stage 1: Build Organizational DNA
             logger.info("STAGE 1: Building Organizational DNA")
             stage1_start = time.time()
-            dna_engine = OrganizationalDNAEngine()
+            # Pass Neo4j credentials from environment
+            dna_engine = OrganizationalDNAEngine(
+                neo4j_uri=os.getenv("NEO4J_URI"),
+                neo4j_user=os.getenv("NEO4J_USERNAME"), 
+                neo4j_password=os.getenv("NEO4J_PASSWORD")
+            )
             dna_engine.build_organizational_dna("./documents", clear_existing=True)
             logger.info(f"DNA building completed in {time.time() - stage1_start:.2f}s")
         else:
@@ -96,12 +101,12 @@ def run_pipeline(skip_stage1=False, autonomous_correlation=False):
         
         if autonomous_correlation:
             # Use autonomous agent with tools
-            from autonomous_correlation_agent import AutonomousCorrelationAgent
+            from .autonomous_correlation_agent import AutonomousCorrelationAgent
             correlator = AutonomousCorrelationAgent()
             try:
                 risk_assessments = correlator.correlate_threats(threat_landscape)
                 # Generate summary
-                from correlation_agent import CorrelationAgent
+                from .correlation_agent import CorrelationAgent
                 temp_agent = CorrelationAgent()
                 executive_summary = temp_agent.generate_executive_summary(risk_assessments)
                 temp_agent.close()

@@ -7,7 +7,8 @@ import os
 from typing import Dict, Any
 from langchain_openai import ChatOpenAI
 from langchain.chains import GraphCypherQAChain
-from langchain_community.graphs import Neo4jGraph
+from langchain_neo4j import Neo4jGraph
+from neo4j import GraphDatabase
 from dotenv import load_dotenv
 load_dotenv()
 
@@ -24,25 +25,74 @@ class PIRGenerator:
         # Initialize LLM
         self.llm = ChatOpenAI(temperature=0.1, model_name="gpt-4o")
         
-        # Initialize Neo4j graph connection
+        # Initialize Neo4j connection with fallback (using direct driver like autonomous agent)
+        self.use_mock = False
         try:
+            # First test direct connection (like autonomous agent)
+            uri = os.getenv("NEO4J_URI")
+            username = os.getenv("NEO4J_USERNAME", "neo4j") 
+            password = os.getenv("NEO4J_PASSWORD")
+            
+            if not password:
+                raise ValueError("NEO4J_PASSWORD not set in environment")
+            
+            print(f"🔍 Testing Neo4j connection to {uri}")
+            
+            # EXACT pattern from official guide - Step 2
+            with GraphDatabase.driver(uri, auth=(username, password)) as driver:
+                # Use verify_connectivity() as recommended in guide
+                driver.verify_connectivity()
+                print("✅ Neo4j connectivity verified!")
+                
+                # Test a basic query using execute_query (Step 4 pattern)
+                records, summary, keys = driver.execute_query("""
+                    RETURN 'cAIber connection test' as message, datetime() as timestamp
+                    """,
+                    database_="neo4j",
+                )
+                
+                if records:
+                    print(f"✅ Query successful: {records[0].data()}")
+                    print(f"✅ Query executed in {summary.result_available_after} ms")
+                
+            # Keep a separate driver for the PIR generator
+            self.driver = GraphDatabase.driver(uri, auth=(username, password))
+            
+            # Now create the LangChain graph wrapper
             self.graph = Neo4jGraph(
-                url=os.getenv("NEO4J_URI"),
-                username=os.getenv("NEO4J_USERNAME", "neo4j"),
-                password=os.getenv("NEO4J_PASSWORD", "password")
+                url=uri,
+                username=username,
+                password=password
             )
-            print("✅ Connected to Neo4j knowledge graph")
+            print("✅ LangChain Neo4j graph wrapper created")
+            
+            # Create PIR generation chain
+            self.chain = GraphCypherQAChain.from_llm(
+                llm=self.llm,
+                graph=self.graph,
+                verbose=True,
+                top_k=20,
+                allow_dangerous_requests=True,  
+            )
+            print("✅ PIR generation chain created")
+            
         except Exception as e:
-            raise ConnectionError(f"Failed to connect to Neo4j: {e}")
-        
-        # Create PIR generation chain
-        self.chain = GraphCypherQAChain.from_llm(
-            llm=self.llm,
-            graph=self.graph,
-            verbose=True,
-            top_k=20,
-            allow_dangerous_requests=True,  
-        )
+            print(f"⚠️  Neo4j connection failed: {e}")
+            print(f"   Error type: {type(e).__name__}")
+            
+            # Check for specific error types
+            if "authentication" in str(e).lower():
+                print("   💡 Check your Neo4j username/password in .env")
+            elif "routing information" in str(e).lower():
+                print("   💡 Your AuraDB instance might be paused - check Neo4j Console")
+            elif "connection refused" in str(e).lower():
+                print("   💡 Check your Neo4j URI and network connection")
+                
+            print("   📋 Falling back to mock data")
+            self.use_mock = True
+            self.graph = None
+            self.chain = None
+            self.driver = None
         
         # Enhanced PIR generation prompt
         self.PIR_GENERATION_PROMPT = """
@@ -75,6 +125,9 @@ class PIRGenerator:
     
     def validate_graph_data(self) -> bool:
         """Validate that the knowledge graph contains data for PIR generation."""
+        if self.use_mock:
+            return True
+            
         print("🔍 Validating knowledge graph data...")
         
         try:
@@ -134,6 +187,10 @@ class PIRGenerator:
         print("=" * 60)
         
         try:
+            if self.use_mock:
+                print("📋 Using mock PIRs (Neo4j unavailable)")
+                return self.get_mock_pirs()
+            
             # Validate graph first
             if not self.validate_graph_data():
                 return {"error": "Knowledge graph validation failed"}
@@ -163,6 +220,52 @@ class PIRGenerator:
                 "error": str(e),
                 "timestamp": __import__('datetime').datetime.now().isoformat()
             }
+    
+    def get_mock_pirs(self) -> Dict[str, Any]:
+        """Return mock PIRs when Neo4j is not available."""
+        mock_pirs = """
+Priority Intelligence Requirements (PIRs) - TechCorp Inc.
+
+PIR-001: Cloud Infrastructure Threats
+- Monitor for vulnerabilities in AWS, Azure, and multi-cloud environments
+- Track containerization threats targeting Kubernetes and Docker deployments
+- Assess supply chain attacks affecting cloud service providers
+
+PIR-002: Critical Asset Protection
+- Intelligence on threats targeting customer databases and payment systems
+- Monitor for credential stuffing and account takeover campaigns
+- Track insider threats and privileged access abuse
+
+PIR-003: Compliance and Regulatory Threats
+- GDPR compliance threats and data privacy violations
+- PCI-DSS related attack vectors targeting payment processing
+- Monitor for regulatory changes affecting cybersecurity requirements
+
+PIR-004: Emerging Threat Landscape
+- Advanced persistent threat (APT) groups targeting financial services
+- Ransomware campaigns using double extortion tactics
+- Zero-day vulnerabilities in enterprise software stack
+
+PIR-005: Geographic and Sector-Specific Intelligence
+- Cyber threats originating from high-risk geographic regions
+- Industry-specific attack patterns in fintech and e-commerce
+- Nation-state sponsored activities targeting critical infrastructure
+        """
+        
+        keywords = {
+            "technologies": ["aws", "azure", "kubernetes", "docker", "postgresql"],
+            "threats": ["ransomware", "apt", "supply-chain", "insider-threat"],
+            "geographies": ["europe", "us-east", "asia-pacific"],
+            "business_initiatives": ["fintech", "e-commerce", "cloud-migration"]
+        }
+        
+        return {
+            "success": True,
+            "pirs": mock_pirs,
+            "keywords": keywords,
+            "timestamp": __import__('datetime').datetime.now().isoformat(),
+            "mock_data": True
+        }
     
     def extract_keywords(self, pir_text: str) -> dict:
         """
@@ -200,6 +303,25 @@ class PIRGenerator:
 
     def get_context_summary(self) -> Dict[str, Any]:
         """Get a summary of organizational context for PIR generation."""
+        if self.use_mock:
+            return {
+                "business_initiatives": [
+                    {"n.name": "Digital Transformation", "n.importance": 0.9, "n.source_document": "mock"},
+                    {"n.name": "Cloud Migration", "n.importance": 0.8, "n.source_document": "mock"}
+                ],
+                "technologies": [
+                    {"n.name": "AWS", "n.confidence": 0.9, "n.source_document": "mock"},
+                    {"n.name": "Kubernetes", "n.confidence": 0.8, "n.source_document": "mock"}
+                ],
+                "geographies": [
+                    {"n.name": "United States", "n.confidence": 0.9, "n.source_document": "mock"},
+                    {"n.name": "Europe", "n.confidence": 0.7, "n.source_document": "mock"}
+                ],
+                "past_threats": [
+                    {"n.name": "Ransomware", "n.confidence": 0.8, "n.source_document": "mock"}
+                ]
+            }
+            
         try:
             # Get business initiatives
             business_initiatives = self.graph.query("""
@@ -243,6 +365,12 @@ class PIRGenerator:
         except Exception as e:
             print(f"Error getting context summary: {e}")
             return {}
+    
+    def close(self):
+        """Close Neo4j driver connection if it exists."""
+        if hasattr(self, 'driver') and self.driver:
+            self.driver.close()
+            print("🔌 Neo4j driver connection closed")
 
 
 def main():

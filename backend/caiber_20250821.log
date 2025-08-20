@@ -1,0 +1,9 @@
+2025-08-21 00:01:31,413 - cAIber - INFO - Initializing Autonomous Correlation Agent
+2025-08-21 00:01:31,438 - cAIber - WARNING - Neo4j not available, using mock data: Unable to retrieve routing information
+2025-08-21 00:01:31,456 - cAIber - INFO - Starting autonomous threat correlation
+2025-08-21 00:01:31,456 - cAIber - INFO - Assessing indicator: New Wave of SquidLoader Malware Targeting Financial Institutions
+2025-08-21 00:01:36,301 - cAIber - INFO - Assessing indicator: New Wave of SquidLoader Malware Targeting Financial Institutions
+2025-08-21 00:01:44,734 - cAIber - INFO - Assessing indicator: New Wave of SquidLoader Malware Targeting Financial Institutions
+2025-08-21 00:01:51,160 - cAIber - INFO - Assessing indicator: New Wave of SquidLoader Malware Targeting Financial Institutions
+2025-08-21 00:01:59,139 - cAIber - INFO - Assessing indicator: New Wave of SquidLoader Malware Targeting Financial Institutions
+2025-08-21 00:02:06,933 - cAIber - INFO - Completed autonomous assessment: 0 risks identified

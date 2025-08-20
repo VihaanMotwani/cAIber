@@ -31,14 +31,17 @@ class AutonomousCorrelationAgent:
         # Try Neo4j connection, fallback to mock if fails
         self.use_mock = False
         try:
-            self.driver = GraphDatabase.driver(
-                os.getenv("NEO4J_URI"),
-                auth=(os.getenv("NEO4J_USERNAME"), os.getenv("NEO4J_PASSWORD"))
-            )
-            # Test connection
-            with self.driver.session() as session:
-                session.run("RETURN 1")
-            logger.info("Connected to Neo4j")
+            uri = os.getenv("NEO4J_URI")
+            username = os.getenv("NEO4J_USERNAME")
+            password = os.getenv("NEO4J_PASSWORD")
+            
+            # Test connection using official guide pattern
+            with GraphDatabase.driver(uri, auth=(username, password)) as test_driver:
+                test_driver.verify_connectivity()
+                logger.info("Neo4j connectivity verified!")
+            
+            # Create persistent driver
+            self.driver = GraphDatabase.driver(uri, auth=(username, password))
         except Exception as e:
             logger.warning(f"Neo4j not available, using mock data: {e}")
             self.use_mock = True

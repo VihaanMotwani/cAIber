@@ -1,14 +1,14 @@
 fastapi
 uvicorn[standard]
 python-dotenv
-neo4j
+neo4j>=5.15.0
 pydantic
 
 langchain
 langchain-experimental
 langchain-community
 langchain-openai
-langchain-neo4j
+langchain-neo4j>=0.0.9
 
 pypdf
 markdown2

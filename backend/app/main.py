@@ -1,14 +1,16 @@
 from fastapi import FastAPI, HTTPException, Body
+from fastapi.middleware.cors import CORSMiddleware
 import os
 from dotenv import load_dotenv
 from typing import Dict, List
-
+from .services.organisational_dna_builder import OrganizationalDNAEngine
 # Import services
 from .services.collection_agent import (
     OTXAgent, CVEAgent, GitHubSecurityAgent, ThreatLandscapeBuilder
 )
 from .services.autonomous_correlation_agent import AutonomousCorrelationAgent
 from .services.pir_generator_main import PIRGenerator
+from .services.simple_pipeline import run_pipeline
 
 load_dotenv()
 
@@ -18,6 +20,15 @@ app = FastAPI(
     version="0.6.0"
 )
 
+# Add CORS middleware
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=["http://localhost:3000", "http://localhost:5173", "*"],
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
+
 # ================================
 # Stage 1: PIR Generation
 # ================================
@@ -25,16 +36,42 @@ app = FastAPI(
 @app.get("/generate-pirs", status_code=200)
 def generate_pirs():
     """
-    Stage 2: Generate Priority Intelligence Requirements (PIRs).
+    Stage 1: Generate Priority Intelligence Requirements (PIRs).
     Returns both raw PIRs and extracted keywords for collection.
     """
     try:
+        # Try to build organizational DNA first
+        try:
+            print("🔍 Attempting to build Organizational DNA...")
+            org_gen = OrganizationalDNAEngine(
+                neo4j_uri=os.getenv("NEO4J_URI"),
+                neo4j_user=os.getenv("NEO4J_USERNAME"),
+                neo4j_password=os.getenv("NEO4J_PASSWORD")
+            )
+            org_gen.build_organizational_dna("./documents", clear_existing=True)
+            print("✅ Organizational DNA built successfully")
+        except Exception as neo4j_error:
+            print(f"❌ Neo4j connection failed: {neo4j_error}")
+            print("⚠️  Falling back to mock data mode")
+            # Continue with PIR generation using mock data
+        
+        # Generate PIRs (will use Neo4j data if available, mock data if not)
         pir_gen = PIRGenerator()
-        pirs = pir_gen.generate_pirs()
-        return {"pirs": pirs}
+        result = pir_gen.generate_pirs()
+        
+        # Handle both success and error cases
+        if not result.get("success", True):
+            raise HTTPException(status_code=500, detail=result.get("error", "PIR generation failed"))
+            
+        return {
+            "pirs": result,
+            "success": True,
+            "mock_data": result.get("mock_data", False),
+            "neo4j_connected": "neo4j_error" not in locals()
+        }
 
     except Exception as e:
-        raise HTTPException(status_code=500, detail=str(e))
+        raise HTTPException(status_code=500, detail=f"PIR generation failed: {str(e)}")
 
 
 # ================================
@@ -154,6 +191,29 @@ def run_all_stages():
             "assessments": assessments,
         }
 
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
+
+
+# ================================
+# Complete Pipeline (Uses simple_pipeline.py)
+# ================================
+@app.post("/run-complete-pipeline", status_code=200)
+def run_complete_pipeline(skip_stage1: bool = False, autonomous_correlation: bool = False):
+    """
+    Run the complete 4-stage cAIber pipeline using simple_pipeline.py.
+    - skip_stage1: Skip Organizational DNA building (faster demo mode)
+    - autonomous_correlation: Use AI agent for correlation instead of standard
+    """
+    try:
+        result = run_pipeline(
+            skip_stage1=skip_stage1,
+            autonomous_correlation=autonomous_correlation
+        )
+        return {
+            "success": True,
+            "result": result
+        }
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
 
