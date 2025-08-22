@@ -35,24 +35,24 @@ class DocumentProcessor:
         
         return documents
     
-    def _load_single_document(self, file_path: str) -> List[Document]:
-        """Load a single document based on its type."""
+    def _load_single_document(self, file_path: str, original_name: str | None = None) -> List[Document]:
         file_path = Path(file_path)
-        
+
         if file_path.suffix.lower() == '.pdf':
             loader = PyPDFLoader(str(file_path))
         elif file_path.suffix.lower() == '.docx':
             loader = Docx2txtLoader(str(file_path))
         else:  # .txt, .md
             loader = TextLoader(str(file_path), encoding='utf-8')
-        
+
         documents = loader.load()
-        
-        # Add metadata about document type
+
         for doc in documents:
-            doc.metadata['file_name'] = file_path.name
-            doc.metadata['file_type'] = self._classify_document_type(file_path.name, doc.page_content)
-        
+            doc.metadata['file_name'] = original_name or file_path.name
+            doc.metadata['file_type'] = self._classify_document_type(
+                original_name or file_path.name, doc.page_content
+            )
+
         return self.text_splitter.split_documents(documents)
     
     def _classify_document_type(self, filename: str, content: str) -> str:

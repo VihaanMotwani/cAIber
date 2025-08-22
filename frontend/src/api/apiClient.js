@@ -1,3 +1,4 @@
+// apiClient.js
 import axios from 'axios'
 import toast from 'react-hot-toast'
 
@@ -5,61 +6,84 @@ const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:8000'
 
 const apiClient = axios.create({
   baseURL: API_URL,
-  headers: {
-    'Content-Type': 'application/json',
-  },
+  headers: { 'Content-Type': 'application/json' },
 })
 
 apiClient.interceptors.response.use(
-  (response) => response,
-  (error) => {
-    const message = error.response?.data?.detail || 'An error occurred'
+  (res) => res,
+  (err) => {
+    const message = err.response?.data?.detail || 'An error occurred'
     toast.error(message)
-    return Promise.reject(error)
+    return Promise.reject(err)
   }
 )
 
 export const api = {
-  // Stage 1: Generate PIRs
-  generatePIRs: async () => {
-    const response = await apiClient.get('/generate-pirs')
-    return response.data
+  // Start an upload session
+  startSession: async () => {
+    const res = await apiClient.post('/documents/start')
+    return res.data // { session_id }
   },
 
-  // Stage 2: Collect Threats
+  // Upload ONE file (session_id required)
+  uploadDocument: async (file, sessionId) => {
+    const fd = new FormData()
+    fd.append('file', file)
+    // Let the browser set multipart boundary; don't set Content-Type manually
+    const res = await axios.post(
+      `${API_URL}/upload?session_id=${encodeURIComponent(sessionId)}`,
+      fd
+    )
+    return res.data
+  },
+
+  // Upload MANY files (session_id required)
+  uploadDocuments: async (files, sessionId) => {
+    const fd = new FormData()
+    files.forEach((f) => fd.append('files', f))
+    const res = await axios.post(
+      `${API_URL}/upload-batch?session_id=${encodeURIComponent(sessionId)}`,
+      fd
+    )
+    return res.data
+  },
+
+  // Stage 1 now POSTs with session_id
+  generatePIRs: async (sessionId, clearExisting = false) => {
+    const res = await apiClient.post('/generate-pirs', {
+      session_id: sessionId,
+      clear_existing: clearExisting,
+    })
+    return res.data
+  },
+
+  // Stage 2–4 unchanged
   collectThreats: async (pirKeywords) => {
-    const response = await apiClient.post('/collect-threats', pirKeywords)
-    return response.data
+    const res = await apiClient.post('/collect-threats', pirKeywords)
+    return res.data
   },
-
-  // Stage 3: Correlate Threats
   correlateThreats: async (threatLandscape) => {
-    const response = await apiClient.post('/correlate-threats', threatLandscape)
-    return response.data
+    const res = await apiClient.post('/correlate-threats', threatLandscape)
+    return res.data
   },
-
-  // Combined: Collect and Correlate
   collectAndCorrelate: async (pirKeywords) => {
-    const response = await apiClient.post('/collect-and-correlate', pirKeywords)
-    return response.data
+    const res = await apiClient.post('/collect-and-correlate', pirKeywords)
+    return res.data
   },
-
-  // Full Pipeline
   runFullPipeline: async () => {
-    const response = await apiClient.post('/run-complete-pipeline')
-    return response.data
+    const res = await apiClient.post('/run-complete-pipeline')
+    return res.data
   },
-
   threatModel: async (intelligenceData) => {
-    const response = await apiClient.post('/threat-model', intelligenceData)
-    return response.data
+    const res = await apiClient.post('/threat-model', intelligenceData)
+    return res.data
   },
 
   // Get Organizational DNA Graph
   getOrganizationalDNA: async () => {
     const response = await apiClient.get('/api/organizational-dna')
     return response.data
-  }
+  },
 }
 
 export default apiClient

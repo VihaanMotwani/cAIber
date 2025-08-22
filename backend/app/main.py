@@ -1,6 +1,8 @@
-from fastapi import FastAPI, HTTPException, Body
+from fastapi import FastAPI, HTTPException, Body, UploadFile, File, Query
 from fastapi.middleware.cors import CORSMiddleware
 import os
+from tempfile import NamedTemporaryFile
+from pathlib import Path
 from dotenv import load_dotenv
 from typing import Dict, List
 from .services.organisational_dna_builder import OrganizationalDNAEngine
@@ -15,6 +17,8 @@ from .services.pir_generator_main import PIRGenerator
 from .services.simple_pipeline import run_pipeline
 from .services.threat_modeling import generate_threat_model
 from .services.logger_config import logger
+from .services.document_processor import DocumentProcessor
+from .services.session_store import create_session, add_docs, get_docs, clear_session
 
 load_dotenv()
 
@@ -32,6 +36,114 @@ app.add_middleware(
     allow_methods=["*"],
     allow_headers=["*"],
 )
+
+ALLOWED = {'.pdf', '.txt', '.docx', '.md'} 
+
+#===================
+# Document Upload
+#===================
+
+@app.post("/documents/start")
+def start_ingest_session():
+    sid = create_session()
+    return {"session_id": sid}
+
+@app.post("/upload")
+async def upload_document(session_id: str = Query(...), file: UploadFile = File(...)):
+    processor = DocumentProcessor()
+    suffix = Path(file.filename).suffix.lower()
+    if suffix not in ALLOWED:
+        raise HTTPException(415, f"Unsupported file type: {suffix}")
+
+    raw = await file.read()
+    with NamedTemporaryFile(delete=True, suffix=suffix) as tmp:
+        tmp.write(raw); tmp.flush()
+        chunks = processor._load_single_document(tmp.name, original_name=file.filename)
+
+    # Save into the session
+    add_docs(session_id, chunks)
+
+    return {
+        "session_id": session_id,
+        "added": len(chunks),
+        "total": len(get_docs(session_id))
+    }
+
+@app.post("/upload-batch")
+async def upload_documents(session_id: str = Query(...), files: List[UploadFile] = File(...)):
+    processor = DocumentProcessor()
+    total = 0
+    for f in files:
+        suffix = Path(f.filename).suffix.lower()
+        if suffix not in ALLOWED:
+            raise HTTPException(415, f"{f.filename}: unsupported file type: {suffix}")
+        raw = await f.read()
+        with NamedTemporaryFile(delete=True, suffix=suffix) as tmp:
+            tmp.write(raw); tmp.flush()
+            chunks = processor._load_single_document(tmp.name, original_name=f.filename)
+            add_docs(session_id, chunks)
+            total += len(chunks)
+
+    return {
+        "session_id": session_id,
+        "added": total,
+        "total": len(get_docs(session_id))
+    }
+
+
+ALLOWED = {'.pdf', '.txt', '.docx', '.md'} 
+
+#===================
+# Document Upload
+#===================
+
+@app.post("/documents/start")
+def start_ingest_session():
+    sid = create_session()
+    return {"session_id": sid}
+
+@app.post("/upload")
+async def upload_document(session_id: str = Query(...), file: UploadFile = File(...)):
+    processor = DocumentProcessor()
+    suffix = Path(file.filename).suffix.lower()
+    if suffix not in ALLOWED:
+        raise HTTPException(415, f"Unsupported file type: {suffix}")
+
+    raw = await file.read()
+    with NamedTemporaryFile(delete=True, suffix=suffix) as tmp:
+        tmp.write(raw); tmp.flush()
+        chunks = processor._load_single_document(tmp.name, original_name=file.filename)
+
+    # Save into the session
+    add_docs(session_id, chunks)
+
+    return {
+        "session_id": session_id,
+        "added": len(chunks),
+        "total": len(get_docs(session_id))
+    }
+
+@app.post("/upload-batch")
+async def upload_documents(session_id: str = Query(...), files: List[UploadFile] = File(...)):
+    processor = DocumentProcessor()
+    total = 0
+    for f in files:
+        suffix = Path(f.filename).suffix.lower()
+        if suffix not in ALLOWED:
+            raise HTTPException(415, f"{f.filename}: unsupported file type: {suffix}")
+        raw = await f.read()
+        with NamedTemporaryFile(delete=True, suffix=suffix) as tmp:
+            tmp.write(raw); tmp.flush()
+            chunks = processor._load_single_document(tmp.name, original_name=f.filename)
+            add_docs(session_id, chunks)
+            total += len(chunks)
+
+    return {
+        "session_id": session_id,
+        "added": total,
+        "total": len(get_docs(session_id))
+    }
+
 
 # Global Neo4j driver
 neo4j_driver = None
@@ -68,9 +180,45 @@ async def shutdown_event():
 # Stage 1: PIR Generation
 # ================================
 
-@app.get("/generate-pirs", status_code=200)
-def generate_pirs():
+@app.post("/generate-pirs", status_code=200)
+def generate_pirs(payload: dict = Body(...)):
     """
+    Stage 1: Generate PIRs after org DNA build from uploaded docs.
+    Body: { "session_id": "...", "clear_existing": false }
+    """
+    session_id = payload.get("session_id")
+    if not session_id:
+        raise HTTPException(400, "session_id is required")
+
+    docs = get_docs(session_id)
+    if not docs:
+        raise HTTPException(400, "No uploaded documents found for this session_id")
+
+    # Try to build Organizational DNA first (upload-only)
+    try:
+        print("🔍 Building Organizational DNA from uploaded files")
+        org_gen = OrganizationalDNAEngine(
+            neo4j_uri=os.getenv("NEO4J_URI"),
+            neo4j_user=os.getenv("NEO4J_USERNAME"),
+            neo4j_password=os.getenv("NEO4J_PASSWORD")
+        )
+        org_gen.build_organizational_dna(
+            documents=docs,
+            clear_existing=bool(payload.get("clear_existing", False)),
+        )
+        print("✅ Organizational DNA built successfully")
+    except Exception as neo4j_error:
+        print(f"❌ Neo4j connection failed: {neo4j_error}")
+        print("⚠️  Falling back to mock data mode")
+
+    # Generate PIRs (Neo4j-backed if available; else mock)
+    pir_gen = PIRGenerator()
+    result = pir_gen.generate_pirs()
+
+    if not result.get("success", True):
+        raise HTTPException(status_code=500, detail=result.get("error", "PIR generation failed"))
+
+    return result
     Stage 1: Generate Priority Intelligence Requirements (PIRs).
     Returns both raw PIRs and extracted keywords for collection.
     """
@@ -99,9 +247,6 @@ def generate_pirs():
             raise HTTPException(status_code=500, detail=result.get("error", "PIR generation failed"))
             
         return result
-
-    except Exception as e:
-        raise HTTPException(status_code=500, detail=f"PIR generation failed: {str(e)}")
 
 @app.get("/api/organizational-dna", status_code=200)
 def get_organizational_dna():

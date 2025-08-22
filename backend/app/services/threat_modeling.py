@@ -15,21 +15,51 @@ COMPREHENSIVE_MODEL_PROMPT = """
 You are a senior cybersecurity threat intelligence analyst. Your task is to create a comprehensive threat model based on the provided JSON intelligence summary.
 
 Your analysis must:
-1.  Identify ALL plausible attack paths from the threat actors to the key assets mentioned in the risk assessments.
-2.  For each identified attack path, break it down into a sequence of steps.
-3.  For each step, provide a detailed analysis including:
-    a. A clear description of the attacker's action.
-    b. The most relevant **MITRE ATT&CK Tactic and Technique** (e.g., "Initial Access (T1566): Phishing").
-    c. A **STRIDE Threat Classification** (Spoofing, Tampering, Repudiation, Information Disclosure, Denial of Service, or Elevation of Privilege).
-    d. A brief justification for your classifications.
+1. Identify ALL plausible attack paths from the threat actors to the key assets mentioned in the risk assessments.
+2. For each identified attack path, break it down into a sequence of steps.
+3. For each step, provide a detailed analysis including:
+   a. A clear description of the attacker's action.  
+   b. The most relevant **MITRE ATT&CK Tactic and Technique** (e.g., "Initial Access (T1566): Phishing").  
+   c. A **STRIDE Threat Classification** (Spoofing, Tampering, Repudiation, Information Disclosure, Denial of Service, or Elevation of Privilege).  
+   d. A brief justification for your classifications.
 
-Structure your final output as a single JSON object with one key: "attack_paths".
-The value should be a list of paths. Each path object should contain a "path_description" and a list of "steps".
+Structure your final output as a single JSON object with one key: "attack_paths".  
+The value must be a list of paths. Each path object must contain:
+- "path_description": string  
+- "steps": array of step objects, each with "description", "mitre_attack", "stride_classification", "justification".
 
-Now, analyze the following intelligence data and generate the comprehensive threat model.
+Important:
+- Return ONLY valid JSON.  
+- Do NOT include prose, markdown, or code fences.  
+- Follow the exact structure of the example below.  
 
-Data:
+Example (valid JSON output):
+{
+  "attack_paths": [
+    {
+      "path_description": "Exploit public-facing Confluence (CVE-2024-21748) to pivot to internal file shares.",
+      "steps": [
+        {
+          "description": "Scan and identify unpatched Confluence server exposed to the internet.",
+          "mitre_attack": "Reconnaissance (T1595): Active Scanning",
+          "stride_classification": "Information Disclosure",
+          "justification": "Target discovery reveals service/version details enabling exploit selection."
+        },
+        {
+          "description": "Trigger RCE on Confluence via CVE-2024-21748 to gain shell.",
+          "mitre_attack": "Initial Access (T1190): Exploit Public-Facing Application",
+          "stride_classification": "Elevation of Privilege",
+          "justification": "Unauthenticated RCE results in unauthorized code execution."
+        }
+      ]
+    }
+  ]
+}
+
+Now, analyze the following intelligence data and generate the comprehensive threat model:  
 {context_data}
+
+Return ONLY the JSON object.
 """
 
 def generate_threat_model(intelligence_data: dict) -> dict:
@@ -37,13 +67,10 @@ def generate_threat_model(intelligence_data: dict) -> dict:
     Analyzes a full intelligence package to generate a comprehensive threat model
     with multiple, fully analyzed attack paths.
     """
-    # Truncate PIRs to prevent token overflow
-    truncated_data = intelligence_data.copy()
-    if 'pirs' in truncated_data and len(truncated_data['pirs']) > 10000:
-        truncated_data['pirs'] = truncated_data['pirs'][:10000] + "\n\n[... PIRs truncated to prevent token overflow ...]"
-    
-    context_str = json.dumps(truncated_data, indent=2)
-    prompt = COMPREHENSIVE_MODEL_PROMPT.format(context_data=context_str)
+    context_str = json.dumps(intelligence_data, indent=2)
+    prompt = f"""{COMPREHENSIVE_MODEL_PROMPT}
+    {json.dumps(intelligence_data, indent=2)}
+    """
     
     response = llm.invoke(prompt)
     raw_output = response.content

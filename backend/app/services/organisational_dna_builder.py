@@ -1,66 +1,53 @@
 """
 organizational_dna_engine.py
-Main orchestrator for cAIber Stage 1 - Organizational DNA Engine
+Main orchestrator for cAIber Stage 1 - Organizational DNA Engine (upload-only)
 """
 
-import os
-from typing import Dict, Any
-from .document_processor import DocumentProcessor
+from typing import Dict, Any, List
+from langchain.schema import Document
 from .entity_extractor import EntityExtractor
 from .knowledge_graph_builder import KnowledgeGraphBuilder
-
 from dotenv import load_dotenv
+
 load_dotenv()
 
 class OrganizationalDNAEngine:
-    """Main engine that coordinates document processing and knowledge graph building."""
-    
-    def __init__(self, 
-                 neo4j_uri: str = None, 
-                 neo4j_user: str = None, 
-                 neo4j_password: str = None):
-        
+    """Coordinates entity extraction and knowledge graph building from uploaded doc chunks."""
+
+    def __init__(self,
+                 neo4j_uri: str | None = None,
+                 neo4j_user: str | None = None,
+                 neo4j_password: str | None = None):
         print("🚀 Initializing cAIber Organizational DNA Engine")
         print("=" * 50)
-        
-        # Initialize components
-        self.doc_processor = DocumentProcessor()
         self.entity_extractor = EntityExtractor()
         self.graph_builder = KnowledgeGraphBuilder(neo4j_uri, neo4j_user, neo4j_password)
-    
-    def build_organizational_dna(self, documents_directory: str, clear_existing: bool = False) -> None:
-        """Main method to build the organizational DNA knowledge graph."""
-        print("🧬 Building Organizational DNA")
-        print("=" * 50)
-        
-        # Step 1: Load and process documents
-        print("\n📄 Step 1: Loading documents...")
-        documents = self.doc_processor.load_documents(documents_directory)
-        
+
+    def build_organizational_dna(
+        self,
+        documents: List[Document],
+        clear_existing: bool = False,
+    ) -> None:
+        """Build the knowledge graph strictly from uploaded in-memory documents."""
         if not documents:
-            print("❌ No documents found! Please check the directory path.")
+            print("❌ No documents provided!")
             return
-            
-        print(f"✅ Loaded {len(documents)} document chunks")
-        
-        # Show document breakdown
-        doc_types = {}
-        for doc in documents:
-            doc_type = doc.metadata.get('file_type', 'unknown')
-            doc_types[doc_type] = doc_types.get(doc_type, 0) + 1
-        
-        print("📊 Document breakdown:")
-        for doc_type, count in doc_types.items():
-            print(f"   • {doc_type}: {count} chunks")
-        
-        # Step 2: Extract entities and relationships
-        print("\n🔍 Step 2: Extracting entities and relationships...")
+
+        print(f"✅ Received {len(documents)} document chunks")
+
+        # breakdown
+        doc_types: Dict[str, int] = {}
+        for d in documents:
+            dt = d.metadata.get("file_type", "unknown")
+            doc_types[dt] = doc_types.get(dt, 0) + 1
+        print("📊 Document breakdown:", doc_types)
+
+        print("\n🔍 Extracting entities and relationships...")
         extraction_result = self.entity_extractor.extract_entities_and_relationships(documents)
         entities = extraction_result['entities']
         relationships = extraction_result['relationships']
-        
         if not entities:
-            print("❌ No entities extracted! Check your documents or extraction logic.")
+            print("❌ No entities extracted!")
             return
             
         print(f"✅ Extracted {len(entities)} unique entities and {len(relationships)} relationships")
@@ -91,53 +78,50 @@ class OrganizationalDNAEngine:
         self.graph_builder.build_knowledge_graph(entities, clear_existing, relationships)
         
         print("\n✅ Organizational DNA Build Complete!")
-        print("=" * 50)
-    
+
     def get_dna_summary(self) -> Dict[str, Any]:
-        """Get a comprehensive summary of the organizational DNA."""
+        """Return a summary from the graph backend."""
         return self.graph_builder.get_graph_summary()
-    
+
     def validate_build(self) -> bool:
-        """Validate that the knowledge graph was built successfully."""
+        """Validate that the graph contains data."""
         print("\n🔧 Validating Organizational DNA Build...")
         print("=" * 40)
-        
+
         try:
             summary = self.get_dna_summary()
-            
             print(f"📊 Graph Statistics:")
             print(f"   • Total nodes: {summary['total_nodes']}")
             print(f"   • Total relationships: {summary['total_relationships']}")
-            
+
             print(f"\n📈 Entity Distribution:")
             for entity_type, count in summary['entity_counts'].items():
                 print(f"   • {entity_type}: {count}")
-            
+
             if summary['relationship_counts']:
                 print(f"\n🔗 Relationship Distribution:")
                 for rel_type, count in summary['relationship_counts'].items():
                     print(f"   • {rel_type}: {count}")
-            
-            # Show sample entities
+
             sample_entities = self.graph_builder.get_sample_entities(5)
             if sample_entities:
                 print(f"\n🎯 Sample High-Confidence Entities:")
                 for entity in sample_entities:
                     print(f"   • {entity['name']} ({entity['type']}) - {entity['confidence']:.2f}")
-            
+
             if summary['total_nodes'] > 0:
                 print("\n✅ Build validation successful!")
                 return True
             else:
                 print("\n❌ Build validation failed - no nodes created")
                 return False
-                
+
         except Exception as e:
             print(f"\n❌ Build validation failed: {e}")
             return False
-    
+
     def close(self):
-        """Close all connections and cleanup."""
+        """Cleanup resources."""
         self.graph_builder.close()
 
 
