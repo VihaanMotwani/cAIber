@@ -1,10 +1,11 @@
 import React, { useRef, useEffect, useState } from 'react'
 import * as d3 from 'd3'
-import { ZoomIn, ZoomOut, RotateCw } from 'lucide-react'
+import { ZoomIn, ZoomOut, RefreshCw } from 'lucide-react'
 
-const SimpleKnowledgeGraph = ({ graphData }) => {
+const SimpleKnowledgeGraph = ({ graphData, onRefresh }) => {
   const svgRef = useRef()
   const [selectedNode, setSelectedNode] = useState(null)
+  const [zoomBehavior, setZoomBehavior] = useState(null)
   
   // Mock data if no graphData provided
   const data = graphData || {
@@ -55,12 +56,26 @@ const SimpleKnowledgeGraph = ({ graphData }) => {
     const width = 800
     const height = 600
 
+    // Create zoom behavior
+    const zoom = d3.zoom()
+      .scaleExtent([0.1, 4])
+      .on('zoom', (event) => {
+        container.attr('transform', event.transform)
+      })
+    
+    // Apply zoom to SVG
+    svg.call(zoom)
+    setZoomBehavior(zoom)
+    
+    // Create container group for all graph elements
+    const container = svg.append('g')
+
     const simulation = d3.forceSimulation(data.nodes)
       .force("link", d3.forceLink(data.links).id(d => d.id).distance(100))
       .force("charge", d3.forceManyBody().strength(-300))
       .force("center", d3.forceCenter(width / 2, height / 2))
 
-    const link = svg.append("g")
+    const link = container.append("g")
       .selectAll("line")
       .data(data.links)
       .join("line")
@@ -68,7 +83,7 @@ const SimpleKnowledgeGraph = ({ graphData }) => {
       .attr("stroke-opacity", 0.3)
       .attr("stroke-width", 2)
 
-    const node = svg.append("g")
+    const node = container.append("g")
       .selectAll("g")
       .data(data.nodes)
       .join("g")
@@ -129,24 +144,29 @@ const SimpleKnowledgeGraph = ({ graphData }) => {
 
   const handleZoomIn = () => {
     const svg = d3.select(svgRef.current)
-    svg.transition().call(
-      d3.zoom().scaleBy, 1.5
-    )
+    if (zoomBehavior) {
+      svg.transition().call(zoomBehavior.scaleBy, 1.5)
+    }
   }
 
   const handleZoomOut = () => {
     const svg = d3.select(svgRef.current)
-    svg.transition().call(
-      d3.zoom().scaleBy, 0.67
-    )
+    if (zoomBehavior) {
+      svg.transition().call(zoomBehavior.scaleBy, 0.67)
+    }
+  }
+
+  const handleRefresh = () => {
+    if (onRefresh) {
+      onRefresh()
+    }
   }
 
   const handleReset = () => {
     const svg = d3.select(svgRef.current)
-    svg.transition().call(
-      d3.zoom().transform,
-      d3.zoomIdentity
-    )
+    if (zoomBehavior) {
+      svg.transition().call(zoomBehavior.transform, d3.zoomIdentity)
+    }
   }
 
   return (
@@ -179,9 +199,16 @@ const SimpleKnowledgeGraph = ({ graphData }) => {
           <button
             onClick={handleReset}
             className="p-2 bg-matrix-darkgray hover:bg-matrix-darkgreen rounded-lg transition-colors border border-matrix-darkgreen"
-            title="Reset View"
+            title="Reset Zoom"
           >
             <RotateCw className="w-4 h-4 text-matrix-green" />
+          </button>
+          <button
+            onClick={handleRefresh}
+            className="p-2 bg-matrix-darkgray hover:bg-matrix-darkgreen rounded-lg transition-colors border border-matrix-darkgreen"
+            title="Refresh Data"
+          >
+            <RefreshCw className="w-4 h-4 text-matrix-green" />
           </button>
         </div>
 

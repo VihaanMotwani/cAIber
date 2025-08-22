@@ -53,6 +53,12 @@ export const api = {
   threatModel: async (intelligenceData) => {
     const response = await apiClient.post('/threat-model', intelligenceData)
     return response.data
+  },
+
+  // Get Organizational DNA Graph
+  getOrganizationalDNA: async () => {
+    const response = await apiClient.get('/api/organizational-dna')
+    return response.data
   }
 }
 

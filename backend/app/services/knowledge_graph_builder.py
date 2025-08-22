@@ -17,7 +17,7 @@ class KnowledgeGraphBuilder:
                  neo4j_password: str = None):
         
         # Use environment variables or defaults
-        self.uri = neo4j_uri or os.getenv("NEO4J_URI", "neo4j+s://cc633ab6.databases.neo4j.io")
+        self.uri = neo4j_uri or os.getenv("NEO4J_URI", "neo4j+ssc://cc633ab6.databases.neo4j.io")
         self.user = neo4j_user or os.getenv("NEO4J_USERNAME", "neo4j")
         self.password = neo4j_password or os.getenv("NEO4J_PASSWORD", "password")
         
@@ -33,9 +33,10 @@ class KnowledgeGraphBuilder:
             print(f"   User: {self.user}")
             raise e
     
-    def build_knowledge_graph(self, entities: List[Dict[str, Any]], clear_existing: bool = False) -> None:
-        """Build the Neo4j knowledge graph from extracted entities."""
-        print(f"🏗️  Building knowledge graph with {len(entities)} entities...")
+    def build_knowledge_graph(self, entities: List[Dict[str, Any]], clear_existing: bool = False, relationships: List[Dict[str, Any]] = None) -> None:
+        """Build the Neo4j knowledge graph from extracted entities and relationships."""
+        relationships = relationships or []
+        print(f"🏗️  Building knowledge graph with {len(entities)} entities and {len(relationships)} LLM relationships...")
         
         with self.driver.session() as session:
             if clear_existing:
@@ -68,17 +69,10 @@ class KnowledgeGraphBuilder:
             
             print(f"✅ Created {len(entities)} entity nodes")
             
-            # Create document-based relationships
-            print("🔗 Creating document-based relationships...")
-            result = session.run("""
-                MATCH (e1:Entity), (e2:Entity)
-                WHERE e1.source_document = e2.source_document 
-                AND e1.id < e2.id
-                MERGE (e1)-[:RELATED_IN_DOCUMENT]->(e2)
-                RETURN count(*) as relationships_created
-            """)
-            doc_rels = result.single()['relationships_created']
-            print(f"✅ Created {doc_rels} document-based relationships")
+            # Skip broad document-based relationships to reduce noise
+            # Instead, focus only on high-value semantic relationships
+            doc_rels = 0
+            print("🔗 Skipping document-based relationships to reduce graph noise")
             
             # Create semantic relationships
             print("🧠 Creating semantic relationships...")
@@ -113,11 +107,73 @@ class KnowledgeGraphBuilder:
             """)
             bus_geo_rels = result.single()['relationships_created']
             
-            total_semantic = bus_tech_rels + threat_vuln_rels + bus_geo_rels
+            # Organizations operate in geographies
+            result = session.run("""
+                MATCH (org:Entity), (geo:Entity)
+                WHERE org.type = 'organization' AND geo.type = 'geography'
+                AND org.source_document = geo.source_document
+                MERGE (org)-[:OPERATES_IN]->(geo)
+                RETURN count(*) as relationships_created
+            """)
+            org_geo_rels = result.single()['relationships_created']
+            
+            # Organizations use technologies (but limit to high confidence entities)
+            result = session.run("""
+                MATCH (org:Entity), (tech:Entity)
+                WHERE org.type = 'organization' AND tech.type = 'technology'
+                AND org.source_document = tech.source_document
+                AND org.confidence > 0.7 AND tech.confidence > 0.7
+                MERGE (org)-[:USES]->(tech)
+                RETURN count(*) as relationships_created
+            """)
+            org_tech_rels = result.single()['relationships_created']
+            
+            total_semantic = bus_tech_rels + threat_vuln_rels + bus_geo_rels + org_geo_rels + org_tech_rels
             print(f"✅ Created {total_semantic} semantic relationships")
             print(f"   • Business → Technology: {bus_tech_rels}")
             print(f"   • Threat → Vulnerability: {threat_vuln_rels}")
             print(f"   • Business → Geography: {bus_geo_rels}")
+            print(f"   • Organization → Geography: {org_geo_rels}")
+            print(f"   • Organization → Technology: {org_tech_rels}")
+            
+            # Create LLM-discovered relationships
+            if relationships:
+                print("🤖 Creating LLM-discovered relationships...")
+                llm_rels_created = 0
+                
+                for rel in relationships:
+                    try:
+                        session.run("""
+                            MATCH (source:Entity {id: $source_id})
+                            MATCH (target:Entity {id: $target_id})
+                            MERGE (source)-[r:%s]->(target)
+                            SET r.confidence = $confidence,
+                                r.evidence = $evidence,
+                                r.source_document = $source_document,
+                                r.source_type = 'llm'
+                            RETURN r
+                        """ % rel['relationship_type'],
+                            source_id=rel['source'],
+                            target_id=rel['target'],
+                            confidence=rel['confidence'],
+                            evidence=rel.get('evidence', ''),
+                            source_document=rel.get('source_document', '')
+                        )
+                        llm_rels_created += 1
+                    except Exception as e:
+                        print(f"⚠️  Failed to create relationship {rel['relationship_type']}: {e}")
+                
+                print(f"✅ Created {llm_rels_created} LLM-discovered relationships")
+                
+                # Show LLM relationship breakdown
+                llm_rel_types = {}
+                for rel in relationships:
+                    rel_type = rel['relationship_type']
+                    llm_rel_types[rel_type] = llm_rel_types.get(rel_type, 0) + 1
+                
+                print("🤖 LLM relationship types:")
+                for rel_type, count in sorted(llm_rel_types.items()):
+                    print(f"   • {rel_type}: {count}")
     
     def get_graph_summary(self) -> Dict[str, Any]:
         """Get a summary of the knowledge graph."""

@@ -54,14 +54,16 @@ class OrganizationalDNAEngine:
             print(f"   • {doc_type}: {count} chunks")
         
         # Step 2: Extract entities and relationships
-        print("\n🔍 Step 2: Extracting entities...")
-        entities = self.entity_extractor.extract_entities(documents)
+        print("\n🔍 Step 2: Extracting entities and relationships...")
+        extraction_result = self.entity_extractor.extract_entities_and_relationships(documents)
+        entities = extraction_result['entities']
+        relationships = extraction_result['relationships']
         
         if not entities:
             print("❌ No entities extracted! Check your documents or extraction logic.")
             return
             
-        print(f"✅ Extracted {len(entities)} unique entities")
+        print(f"✅ Extracted {len(entities)} unique entities and {len(relationships)} relationships")
         
         # Show entity breakdown
         entity_types = {}
@@ -73,9 +75,20 @@ class OrganizationalDNAEngine:
         for entity_type, count in entity_types.items():
             print(f"   • {entity_type}: {count} entities")
         
+        # Show relationship breakdown
+        if relationships:
+            relationship_types = {}
+            for rel in relationships:
+                rel_type = rel['relationship_type']
+                relationship_types[rel_type] = relationship_types.get(rel_type, 0) + 1
+            
+            print("🔗 Relationship breakdown:")
+            for rel_type, count in sorted(relationship_types.items()):
+                print(f"   • {rel_type}: {count} relationships")
+        
         # Step 3: Build knowledge graph
         print("\n🕸️  Step 3: Building knowledge graph...")
-        self.graph_builder.build_knowledge_graph(entities, clear_existing)
+        self.graph_builder.build_knowledge_graph(entities, clear_existing, relationships)
         
         print("\n✅ Organizational DNA Build Complete!")
         print("=" * 50)
@@ -134,7 +147,7 @@ def main():
     print("=" * 60)
     
     # Check environment
-    documents_dir = "./documents"
+    documents_dir = "../documents"
     if not os.path.exists(documents_dir):
         print(f"❌ Documents directory '{documents_dir}' not found!")
         print("   Create it and add some sample documents (PDF, TXT, DOCX, MD)")

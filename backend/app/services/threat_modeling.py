@@ -8,7 +8,7 @@ load_dotenv()
 
 # We only need the LLM for this service, no graph connection is needed here
 # as the context is provided directly in the input data.
-llm = ChatOpenAI(temperature=0.1, model_name="gpt-4o", openai_api_key=os.getenv("OPENAI_API_KEY"))
+llm = ChatOpenAI(temperature=0.1, model_name="gpt-4o-mini", openai_api_key=os.getenv("OPENAI_API_KEY"))
 
 # This is a much more advanced prompt to guide the LLM's analysis.
 COMPREHENSIVE_MODEL_PROMPT = """
@@ -37,7 +37,12 @@ def generate_threat_model(intelligence_data: dict) -> dict:
     Analyzes a full intelligence package to generate a comprehensive threat model
     with multiple, fully analyzed attack paths.
     """
-    context_str = json.dumps(intelligence_data, indent=2)
+    # Truncate PIRs to prevent token overflow
+    truncated_data = intelligence_data.copy()
+    if 'pirs' in truncated_data and len(truncated_data['pirs']) > 10000:
+        truncated_data['pirs'] = truncated_data['pirs'][:10000] + "\n\n[... PIRs truncated to prevent token overflow ...]"
+    
+    context_str = json.dumps(truncated_data, indent=2)
     prompt = COMPREHENSIVE_MODEL_PROMPT.format(context_data=context_str)
     
     response = llm.invoke(prompt)

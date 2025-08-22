@@ -4,6 +4,8 @@ import os
 from dotenv import load_dotenv
 from typing import Dict, List
 from .services.organisational_dna_builder import OrganizationalDNAEngine
+from .services.knowledge_graph_builder import KnowledgeGraphBuilder
+from neo4j import GraphDatabase
 # Import services
 from .services.collection_agent import (
     OTXAgent, CVEAgent, GitHubSecurityAgent, ThreatLandscapeBuilder
@@ -31,6 +33,37 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
+# Global Neo4j driver
+neo4j_driver = None
+
+@app.on_event("startup")
+async def startup_event():
+    """Initialize connections on startup"""
+    global neo4j_driver
+    try:
+        neo4j_uri = os.getenv("NEO4J_URI", "neo4j+ssc://cc633ab6.databases.neo4j.io")
+        neo4j_user = os.getenv("NEO4J_USERNAME", "neo4j")
+        neo4j_password = os.getenv("NEO4J_PASSWORD")
+        
+        neo4j_driver = GraphDatabase.driver(neo4j_uri, auth=(neo4j_user, neo4j_password))
+        
+        # Test the connection
+        with neo4j_driver.session() as session:
+            result = session.run("RETURN 1 as test")
+            result.single()
+        
+        logger.info("✅ Neo4j connection established on startup")
+    except Exception as e:
+        logger.error(f"❌ Failed to connect to Neo4j on startup: {e}")
+
+@app.on_event("shutdown")
+async def shutdown_event():
+    """Close connections on shutdown"""
+    global neo4j_driver
+    if neo4j_driver:
+        neo4j_driver.close()
+        logger.info("🔌 Neo4j connection closed")
+
 # ================================
 # Stage 1: PIR Generation
 # ================================
@@ -50,7 +83,7 @@ def generate_pirs():
                 neo4j_user=os.getenv("NEO4J_USERNAME"),
                 neo4j_password=os.getenv("NEO4J_PASSWORD")
             )
-            org_gen.build_organizational_dna("./documents", clear_existing=True)
+            org_gen.build_organizational_dna("../documents", clear_existing=True)
             print("✅ Organizational DNA built successfully")
         except Exception as neo4j_error:
             print(f"❌ Neo4j connection failed: {neo4j_error}")
@@ -69,6 +102,120 @@ def generate_pirs():
 
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"PIR generation failed: {str(e)}")
+
+@app.get("/api/organizational-dna", status_code=200)
+def get_organizational_dna():
+    """
+    Get the organizational DNA knowledge graph from Neo4j.
+    Returns nodes and relationships in a format suitable for visualization.
+    """
+    try:
+        # Use global Neo4j driver
+        global neo4j_driver
+        if not neo4j_driver:
+            raise HTTPException(status_code=503, detail="Neo4j connection not available")
+        
+        nodes = []
+        links = []
+        node_map = {}  # To track unique nodes
+        
+        with neo4j_driver.session() as session:
+            # Fetch all nodes
+            result = session.run("""
+                MATCH (n:Entity)
+                RETURN n.id AS id, 
+                       n.name AS label, 
+                       n.type AS type,
+                       n.confidence AS confidence,
+                       n.importance AS importance
+                ORDER BY n.confidence DESC
+                LIMIT 200
+            """)
+            
+            # Define color mapping for different entity types
+            color_map = {
+                'technology': '#14b8a6',
+                'organization': '#0ea5e9', 
+                'geography': '#f59e0b',
+                'threat_actor': '#ef4444',
+                'vulnerability': '#dc2626',
+                'business_initiative': '#8b5cf6',
+                'business_asset': '#a855f7',
+                'compliance_requirement': '#f97316',
+                'financial_data': '#22c55e'
+            }
+            
+            for record in result:
+                node_id = record['id']
+                node_type = record['type']
+                
+                # Calculate node size based on confidence and importance
+                confidence = record['confidence'] or 0.5
+                importance = record['importance'] or 5
+                val = int(10 + (confidence * 10) + (importance * 2))
+                
+                node = {
+                    'id': node_id,
+                    'label': record['label'],
+                    'type': node_type,
+                    'val': val,
+                    'color': color_map.get(node_type, '#6b7280')
+                }
+                nodes.append(node)
+                node_map[node_id] = node
+            
+            # Fetch relationships
+            result = session.run("""
+                MATCH (source:Entity)-[r]->(target:Entity)
+                WHERE source.id IN $node_ids AND target.id IN $node_ids
+                RETURN source.id AS source, 
+                       target.id AS target, 
+                       type(r) AS relationship_type,
+                       r.confidence AS confidence
+                LIMIT 500
+            """, node_ids=list(node_map.keys()))
+            
+            for record in result:
+                source_id = record['source']
+                target_id = record['target']
+                
+                # Only include links where both nodes exist
+                if source_id in node_map and target_id in node_map:
+                    confidence = record['confidence'] or 0.5
+                    links.append({
+                        'source': source_id,
+                        'target': target_id,
+                        'value': int(confidence * 5),  # Link thickness based on confidence
+                        'type': record['relationship_type']
+                    })
+        
+        # Driver is managed globally, no need to close
+        
+        # Calculate stats
+        node_types = {}
+        for node in nodes:
+            node_type = node['type']
+            node_types[node_type] = node_types.get(node_type, 0) + 1
+        
+        return {
+            'nodes': nodes,
+            'links': links,
+            'stats': {
+                'totalNodes': len(nodes),
+                'technologies': node_types.get('technology', 0),
+                'organizations': node_types.get('organization', 0),
+                'geographies': node_types.get('geography', 0),
+                'threats': node_types.get('threat_actor', 0),
+                'vulnerabilities': node_types.get('vulnerability', 0),
+                'business_initiatives': node_types.get('business_initiative', 0),
+                'business_assets': node_types.get('business_asset', 0),
+                'compliance': node_types.get('compliance_requirement', 0)
+            }
+        }
+        
+    except Exception as e:
+        logger.error(f"Failed to fetch organizational DNA: {str(e)}")
+        raise HTTPException(status_code=500, detail=f"Failed to fetch organizational DNA: {str(e)}")
 
 
 # ================================

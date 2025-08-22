@@ -1,10 +1,12 @@
 import React, { useState, useEffect } from 'react'
 import { motion } from 'framer-motion'
-import { Network, Building2, Shield, Database, AlertCircle, Layers } from 'lucide-react'
+import { Network, Building2, Shield, Database, AlertCircle, Layers, Play } from 'lucide-react'
 import SimpleKnowledgeGraph from '../components/Visualizations/SimpleKnowledgeGraph'
 import { api } from '../api/apiClient'
+import { usePipelineStore } from '../store/pipelineStore'
 
 const OrganizationalDNA = () => {
+  const { results, stageProgress } = usePipelineStore()
   const [graphData, setGraphData] = useState(null)
   const [loading, setLoading] = useState(false)
   const [stats, setStats] = useState({
@@ -16,16 +18,26 @@ const OrganizationalDNA = () => {
   })
   const [viewMode, setViewMode] = useState('3d')
 
+  // Check if Stage 1 (PIR generation + DNA building) has completed
+  const hasStage1Completed = stageProgress.stage1.status === 'completed' || results?.pirs
+
   useEffect(() => {
-    fetchGraphData()
-  }, [])
+    // Only fetch graph data if Stage 1 has completed
+    if (hasStage1Completed) {
+      fetchGraphData()
+    }
+  }, [hasStage1Completed])
 
   const fetchGraphData = async () => {
     setLoading(true)
     try {
-      // For now, using mock data
-      // In production, this would fetch from: GET /api/organizational-dna
-      const mockData = {
+      // Fetch real data from the backend
+      console.log('Fetching organizational DNA...')
+      const graphData = await api.getOrganizationalDNA()
+      console.log('Received graph data:', graphData)
+      
+      // If the API call fails or returns no data, use mock as fallback
+      const mockData = graphData || {
         nodes: [
           { id: 'org-root', label: 'TechCorp Inc.', type: 'organization', val: 25, color: '#0ea5e9' },
           
@@ -101,27 +113,92 @@ const OrganizationalDNA = () => {
         ]
       }
       
-      setGraphData(mockData)
+      const finalData = graphData || mockData
+      setGraphData(finalData)
       
-      // Calculate stats
-      const nodeTypes = mockData.nodes.reduce((acc, node) => {
-        acc[node.type] = (acc[node.type] || 0) + 1
-        return acc
-      }, {})
-      
-      setStats({
-        totalNodes: mockData.nodes.length,
-        technologies: nodeTypes.technology || 0,
-        assets: nodeTypes.asset || 0,
-        threats: nodeTypes.threat || 0,
-        compliance: nodeTypes.compliance || 0
-      })
+      // Use stats from API if available, otherwise calculate from nodes
+      if (graphData?.stats) {
+        setStats({
+          totalNodes: graphData.stats.totalNodes || 0,
+          technologies: graphData.stats.technologies || 0,
+          assets: (graphData.stats.business_assets || 0) + (graphData.stats.business_initiatives || 0),
+          threats: (graphData.stats.threats || 0) + (graphData.stats.vulnerabilities || 0),
+          compliance: graphData.stats.compliance || 0,
+          organizations: graphData.stats.organizations || 0,
+          geographies: graphData.stats.geographies || 0
+        })
+      } else {
+        // Fallback to calculating from nodes
+        const nodeTypes = finalData.nodes.reduce((acc, node) => {
+          acc[node.type] = (acc[node.type] || 0) + 1
+          return acc
+        }, {})
+        
+        setStats({
+          totalNodes: finalData.nodes.length,
+          technologies: nodeTypes.technology || 0,
+          assets: nodeTypes.asset || 0,
+          threats: nodeTypes.threat || 0,
+          compliance: nodeTypes.compliance || 0
+        })
+      }
       
     } catch (error) {
       console.error('Failed to fetch graph data:', error)
+      console.log('Using mock data as fallback')
+      // Set mock data as fallback
+      setGraphData(mockData)
+      setStats({
+        totalNodes: mockData.nodes.length,
+        technologies: 7,
+        assets: 4,
+        threats: 4,
+        compliance: 4
+      })
     } finally {
       setLoading(false)
     }
+  }
+
+  // Show empty state if Stage 1 hasn't been completed
+  if (!hasStage1Completed) {
+    return (
+      <div className="space-y-6">
+        <motion.div
+          initial={{ opacity: 0, y: -20 }}
+          animate={{ opacity: 1, y: 0 }}
+          className="flex justify-between items-start"
+        >
+          <div>
+            <h1 className="text-3xl font-semibold text-gradient">
+              Organizational DNA
+            </h1>
+            <p className="text-slate-400 mt-2">
+              Interactive knowledge graph visualization of your organization's digital ecosystem
+            </p>
+          </div>
+        </motion.div>
+
+        <div className="flex items-center justify-center min-h-[60vh]">
+          <div className="text-center">
+            <Network className="w-16 h-16 mx-auto text-gray-500 mb-4" />
+            <h2 className="text-2xl font-orbitron text-gray-400 mb-2">Organizational DNA Not Built</h2>
+            <p className="text-gray-500 font-mono mb-4">
+              The knowledge graph is built during Stage 1 of the threat analysis pipeline
+            </p>
+            <div className="inline-flex items-center gap-2 px-4 py-2 bg-slate-800 rounded-lg border border-slate-700">
+              <Play className="w-4 h-4 text-primary-500" />
+              <span className="text-sm text-slate-300 font-mono">
+                Go to Dashboard → Click "Initiate Threat Analysis"
+              </span>
+            </div>
+            <p className="text-xs text-slate-500 mt-3 font-mono">
+              This will extract entities and relationships from your documents
+            </p>
+          </div>
+        </div>
+      </div>
+    )
   }
 
   return (
@@ -223,7 +300,10 @@ const OrganizationalDNA = () => {
             </div>
           </div>
         ) : (
-          <SimpleKnowledgeGraph graphData={graphData} />
+          <SimpleKnowledgeGraph 
+            graphData={graphData} 
+            onRefresh={fetchGraphData}
+          />
         )}
       </motion.div>
 
