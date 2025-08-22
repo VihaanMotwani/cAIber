@@ -63,7 +63,7 @@ def run_pipeline(skip_stage1=False, autonomous_correlation=False):
         logger.info("Generating PIRs")
         pir_gen = PIRGenerator()
         pirs_result = pir_gen.generate_pirs()
-        pirs_text = pirs_result.get("pirs", {}).get("result", "")
+        pirs_text = pirs_result.get("pirs", {})
         logger.info("PIR generation complete")
         
         # Extract keywords from PIRs

@@ -1,0 +1,233 @@
+2025-08-22 19:05:10,138 - cAIber - INFO - Initializing Autonomous Correlation Agent
+2025-08-22 19:05:10,287 - cAIber - INFO - Neo4j connectivity verified!
+2025-08-22 19:05:10,374 - cAIber - INFO - Starting autonomous threat correlation
+2025-08-22 19:05:10,375 - cAIber - INFO - Completed autonomous assessment: 0 risks identified
+2025-08-22 20:34:33,060 - cAIber - INFO - Initializing Autonomous Correlation Agent
+2025-08-22 20:34:33,187 - cAIber - INFO - Neo4j connectivity verified!
+2025-08-22 20:34:33,274 - cAIber - INFO - Starting autonomous threat correlation
+2025-08-22 20:34:33,275 - cAIber - INFO - Completed autonomous assessment: 0 risks identified
+2025-08-22 20:38:57,019 - cAIber - INFO - Initializing Autonomous Correlation Agent
+2025-08-22 20:38:57,170 - cAIber - INFO - Neo4j connectivity verified!
+2025-08-22 20:38:57,239 - cAIber - INFO - Starting autonomous threat correlation
+2025-08-22 20:38:57,241 - cAIber - INFO - Assessing vulnerability: GHSA-mv33-9f6j-pfmc
+2025-08-22 20:39:02,043 - cAIber - INFO - Assessing vulnerability: GHSA-pr72-8fxw-xx22
+2025-08-22 20:39:07,523 - cAIber - INFO - Assessing vulnerability: GHSA-g4vp-4gqr-7v8c
+2025-08-22 20:39:11,393 - cAIber - INFO - Assessing vulnerability: GHSA-8gwm-58g9-j8pw
+2025-08-22 20:39:15,640 - cAIber - INFO - Completed autonomous assessment: 0 risks identified
+2025-08-22 20:48:12,911 - cAIber - INFO - Initializing Autonomous Correlation Agent
+2025-08-22 20:48:13,038 - cAIber - INFO - Neo4j connectivity verified!
+2025-08-22 20:48:13,091 - cAIber - INFO - Starting autonomous threat correlation
+2025-08-22 20:48:13,091 - cAIber - INFO - Assessing vulnerability: GHSA-mv33-9f6j-pfmc
+2025-08-22 20:48:18,460 - cAIber - INFO - Assessing vulnerability: GHSA-pr72-8fxw-xx22
+2025-08-22 20:48:22,016 - cAIber - INFO - Assessing vulnerability: GHSA-g4vp-4gqr-7v8c
+2025-08-22 20:48:29,859 - cAIber - INFO - Assessing vulnerability: GHSA-8gwm-58g9-j8pw
+2025-08-22 20:48:34,122 - cAIber - INFO - Completed autonomous assessment: 0 risks identified
+2025-08-22 20:51:55,520 - cAIber - INFO - Initializing Autonomous Correlation Agent
+2025-08-22 20:51:55,674 - cAIber - INFO - Neo4j connectivity verified!
+2025-08-22 20:51:55,731 - cAIber - INFO - Starting autonomous threat correlation
+2025-08-22 20:51:55,732 - cAIber - INFO - Assessing vulnerability: GHSA-mv33-9f6j-pfmc
+2025-08-22 20:51:59,973 - cAIber - INFO - Assessing vulnerability: GHSA-pr72-8fxw-xx22
+2025-08-22 20:52:04,227 - cAIber - INFO - Assessing vulnerability: GHSA-g4vp-4gqr-7v8c
+2025-08-22 20:52:07,807 - cAIber - INFO - Assessing vulnerability: GHSA-8gwm-58g9-j8pw
+2025-08-22 20:52:12,004 - cAIber - INFO - Completed autonomous assessment: 0 risks identified
+2025-08-22 20:54:38,323 - cAIber - INFO - Initializing Autonomous Correlation Agent
+2025-08-22 20:54:38,459 - cAIber - INFO - Neo4j connectivity verified!
+2025-08-22 20:54:38,508 - cAIber - INFO - Starting autonomous threat correlation
+2025-08-22 20:54:38,509 - cAIber - INFO - Assessing vulnerability: GHSA-mv33-9f6j-pfmc
+2025-08-22 20:54:44,908 - cAIber - INFO - Assessing vulnerability: GHSA-pr72-8fxw-xx22
+2025-08-22 20:54:49,476 - cAIber - INFO - Assessing vulnerability: GHSA-g4vp-4gqr-7v8c
+2025-08-22 20:54:53,270 - cAIber - INFO - Assessing vulnerability: GHSA-8gwm-58g9-j8pw
+2025-08-22 20:54:59,350 - cAIber - INFO - Completed autonomous assessment: 0 risks identified
+2025-08-22 20:56:33,243 - cAIber - INFO - Initializing Autonomous Correlation Agent
+2025-08-22 20:56:33,359 - cAIber - INFO - Neo4j connectivity verified!
+2025-08-22 20:56:33,418 - cAIber - INFO - Starting autonomous threat correlation
+2025-08-22 20:56:33,418 - cAIber - INFO - Assessing vulnerability: GHSA-mv33-9f6j-pfmc
+2025-08-22 20:56:37,945 - cAIber - INFO - Assessing vulnerability: GHSA-pr72-8fxw-xx22
+2025-08-22 20:56:42,952 - cAIber - INFO - Assessing vulnerability: GHSA-g4vp-4gqr-7v8c
+2025-08-22 20:56:46,267 - cAIber - INFO - Assessing vulnerability: GHSA-8gwm-58g9-j8pw
+2025-08-22 20:56:50,731 - cAIber - INFO - Assessing indicator: Analysis of malicious HWP cases of 'APT37' group distributed through K messenger
+2025-08-22 20:56:54,559 - cAIber - INFO - Assessing indicator: Analysis of malicious HWP cases of 'APT37' group distributed through K messenger
+2025-08-22 20:56:58,039 - cAIber - INFO - Assessing indicator: Analysis of malicious HWP cases of 'APT37' group distributed through K messenger
+2025-08-22 20:57:01,209 - cAIber - INFO - Assessing indicator: Analysis of malicious HWP cases of 'APT37' group distributed through K messenger
+2025-08-22 20:57:05,063 - cAIber - INFO - Assessing indicator: Analysis of malicious HWP cases of 'APT37' group distributed through K messenger
+2025-08-22 20:57:08,520 - cAIber - INFO - Completed autonomous assessment: 0 risks identified
+2025-08-22 21:00:27,039 - cAIber - INFO - Starting cAIber pipeline execution
+2025-08-22 21:00:27,039 - cAIber - INFO - STAGE 1: Building Organizational DNA
+2025-08-22 21:01:35,719 - cAIber - INFO - DNA building completed in 68.68s
+2025-08-22 21:01:35,720 - cAIber - INFO - Generating PIRs
+2025-08-22 21:01:44,286 - cAIber - ERROR - Pipeline failed: 'str' object has no attribute 'get'
+Traceback (most recent call last):
+  File "/home/pratz2005/cAIber/backend/app/services/simple_pipeline.py", line 66, in run_pipeline
+    pirs_text = pirs_result.get("pirs", {}).get("result", "")
+                ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+AttributeError: 'str' object has no attribute 'get'
+2025-08-22 21:02:33,890 - cAIber - INFO - Starting cAIber pipeline execution
+2025-08-22 21:02:33,890 - cAIber - INFO - STAGE 1: Building Organizational DNA
+2025-08-22 21:03:55,138 - cAIber - INFO - DNA building completed in 81.25s
+2025-08-22 21:03:55,138 - cAIber - INFO - Generating PIRs
+2025-08-22 21:04:06,085 - cAIber - INFO - PIR generation complete
+2025-08-22 21:04:07,420 - cAIber - INFO - STAGE 2: Collecting threats
+2025-08-22 21:04:11,711 - cAIber - INFO - Stage 2 completed in 4.29s
+2025-08-22 21:04:11,712 - cAIber - INFO - Threats collected: 133 (CVEs: 1, Indicators: 132)
+2025-08-22 21:04:11,712 - cAIber - INFO - STAGE 3: Risk Correlation (Mode: Standard)
+2025-08-22 21:04:11,712 - cAIber - ERROR - Pipeline failed: cannot access local variable 'CorrelationAgent' where it is not associated with a value
+Traceback (most recent call last):
+  File "/home/pratz2005/cAIber/backend/app/services/simple_pipeline.py", line 118, in run_pipeline
+    correlator = CorrelationAgent()
+                 ^^^^^^^^^^^^^^^^
+UnboundLocalError: cannot access local variable 'CorrelationAgent' where it is not associated with a value
+2025-08-22 21:06:29,263 - cAIber - INFO - Initializing Autonomous Correlation Agent
+2025-08-22 21:06:29,384 - cAIber - INFO - Neo4j connectivity verified!
+2025-08-22 21:06:29,415 - cAIber - INFO - Starting autonomous threat correlation
+2025-08-22 21:06:29,416 - cAIber - INFO - Assessing vulnerability: GHSA-mv33-9f6j-pfmc
+2025-08-22 21:06:33,602 - cAIber - INFO - Assessing vulnerability: GHSA-pr72-8fxw-xx22
+2025-08-22 21:06:37,881 - cAIber - INFO - Assessing vulnerability: GHSA-g4vp-4gqr-7v8c
+2025-08-22 21:06:41,923 - cAIber - INFO - Assessing vulnerability: GHSA-8gwm-58g9-j8pw
+2025-08-22 21:06:45,950 - cAIber - INFO - Assessing indicator: Analysis of malicious HWP cases of 'APT37' group distributed through K messenger
+2025-08-22 21:06:50,006 - cAIber - INFO - Assessing indicator: Analysis of malicious HWP cases of 'APT37' group distributed through K messenger
+2025-08-22 21:06:54,047 - cAIber - INFO - Assessing indicator: Analysis of malicious HWP cases of 'APT37' group distributed through K messenger
+2025-08-22 21:06:58,237 - cAIber - INFO - Assessing indicator: Analysis of malicious HWP cases of 'APT37' group distributed through K messenger
+2025-08-22 21:07:02,669 - cAIber - INFO - Assessing indicator: Analysis of malicious HWP cases of 'APT37' group distributed through K messenger
+2025-08-22 21:07:06,573 - cAIber - INFO - Completed autonomous assessment: 0 risks identified
+2025-08-22 21:14:46,359 - cAIber - INFO - Initializing Autonomous Correlation Agent
+2025-08-22 21:14:46,478 - cAIber - INFO - Neo4j connectivity verified!
+2025-08-22 21:14:46,516 - cAIber - INFO - Starting autonomous threat correlation
+2025-08-22 21:14:46,516 - cAIber - INFO - Assessing vulnerability: GHSA-mv33-9f6j-pfmc
+2025-08-22 21:14:51,554 - cAIber - INFO - Assessing vulnerability: GHSA-pr72-8fxw-xx22
+2025-08-22 21:14:56,181 - cAIber - INFO - Assessing vulnerability: GHSA-g4vp-4gqr-7v8c
+2025-08-22 21:15:00,402 - cAIber - INFO - Assessing vulnerability: GHSA-8gwm-58g9-j8pw
+2025-08-22 21:15:03,920 - cAIber - INFO - Assessing indicator: Analysis of malicious HWP cases of 'APT37' group distributed through K messenger
+2025-08-22 21:15:07,554 - cAIber - INFO - Assessing indicator: Analysis of malicious HWP cases of 'APT37' group distributed through K messenger
+2025-08-22 21:15:13,228 - cAIber - INFO - Assessing indicator: Analysis of malicious HWP cases of 'APT37' group distributed through K messenger
+2025-08-22 21:15:17,294 - cAIber - INFO - Assessing indicator: Analysis of malicious HWP cases of 'APT37' group distributed through K messenger
+2025-08-22 21:15:20,934 - cAIber - INFO - Assessing indicator: Analysis of malicious HWP cases of 'APT37' group distributed through K messenger
+2025-08-22 21:15:25,002 - cAIber - INFO - Completed autonomous assessment: 0 risks identified
+2025-08-22 21:44:58,869 - cAIber - INFO - Initializing Autonomous Correlation Agent
+2025-08-22 21:44:59,063 - cAIber - INFO - Neo4j connectivity verified!
+2025-08-22 21:44:59,162 - cAIber - INFO - Starting autonomous threat correlation
+2025-08-22 21:44:59,165 - cAIber - INFO - Assessing vulnerability: GHSA-mv33-9f6j-pfmc
+2025-08-22 21:45:04,598 - cAIber - INFO - Assessing vulnerability: GHSA-pr72-8fxw-xx22
+2025-08-22 21:45:07,829 - cAIber - INFO - Assessing vulnerability: GHSA-g4vp-4gqr-7v8c
+2025-08-22 21:45:13,228 - cAIber - INFO - Assessing vulnerability: GHSA-8gwm-58g9-j8pw
+2025-08-22 21:45:17,603 - cAIber - INFO - Assessing indicator: Analysis of malicious HWP cases of 'APT37' group distributed through K messenger
+2025-08-22 21:45:21,368 - cAIber - INFO - Assessing indicator: Analysis of malicious HWP cases of 'APT37' group distributed through K messenger
+2025-08-22 21:45:25,116 - cAIber - INFO - Assessing indicator: Analysis of malicious HWP cases of 'APT37' group distributed through K messenger
+2025-08-22 21:45:28,864 - cAIber - INFO - Assessing indicator: Analysis of malicious HWP cases of 'APT37' group distributed through K messenger
+2025-08-22 21:45:32,249 - cAIber - INFO - Assessing indicator: Analysis of malicious HWP cases of 'APT37' group distributed through K messenger
+2025-08-22 21:45:35,505 - cAIber - INFO - Completed autonomous assessment: 0 risks identified
+2025-08-22 21:50:49,981 - cAIber - INFO - STAGE 4: Threat Modeling
+2025-08-22 21:53:22,729 - cAIber - INFO - Initializing Autonomous Correlation Agent
+2025-08-22 21:53:23,007 - cAIber - INFO - Neo4j connectivity verified!
+2025-08-22 21:53:23,083 - cAIber - INFO - Starting autonomous threat correlation
+2025-08-22 21:53:23,084 - cAIber - INFO - Assessing vulnerability: GHSA-mv33-9f6j-pfmc
+2025-08-22 21:53:28,169 - cAIber - INFO - Assessing vulnerability: GHSA-pr72-8fxw-xx22
+2025-08-22 21:53:31,305 - cAIber - INFO - Assessing vulnerability: GHSA-g4vp-4gqr-7v8c
+2025-08-22 21:53:34,880 - cAIber - INFO - Assessing vulnerability: GHSA-8gwm-58g9-j8pw
+2025-08-22 21:53:38,365 - cAIber - INFO - Assessing indicator: Analysis of malicious HWP cases of 'APT37' group distributed through K messenger
+2025-08-22 21:53:43,022 - cAIber - INFO - Assessing indicator: Analysis of malicious HWP cases of 'APT37' group distributed through K messenger
+2025-08-22 21:53:46,298 - cAIber - INFO - Assessing indicator: Analysis of malicious HWP cases of 'APT37' group distributed through K messenger
+2025-08-22 21:53:49,618 - cAIber - INFO - Assessing indicator: Analysis of malicious HWP cases of 'APT37' group distributed through K messenger
+2025-08-22 21:53:53,666 - cAIber - INFO - Assessing indicator: Analysis of malicious HWP cases of 'APT37' group distributed through K messenger
+2025-08-22 21:53:56,710 - cAIber - INFO - Completed autonomous assessment: 0 risks identified
+2025-08-22 21:55:44,332 - cAIber - INFO - Initializing Autonomous Correlation Agent
+2025-08-22 21:55:44,471 - cAIber - INFO - Neo4j connectivity verified!
+2025-08-22 21:55:44,547 - cAIber - INFO - Starting autonomous threat correlation
+2025-08-22 21:55:44,549 - cAIber - INFO - Assessing vulnerability: GHSA-mv33-9f6j-pfmc
+2025-08-22 21:55:50,555 - cAIber - INFO - Assessing vulnerability: GHSA-pr72-8fxw-xx22
+2025-08-22 21:55:55,367 - cAIber - INFO - Assessing vulnerability: GHSA-g4vp-4gqr-7v8c
+2025-08-22 21:55:58,805 - cAIber - INFO - Assessing vulnerability: GHSA-8gwm-58g9-j8pw
+2025-08-22 21:56:02,376 - cAIber - INFO - Assessing indicator: Analysis of malicious HWP cases of 'APT37' group distributed through K messenger
+2025-08-22 21:56:05,626 - cAIber - INFO - Assessing indicator: Analysis of malicious HWP cases of 'APT37' group distributed through K messenger
+2025-08-22 21:56:08,637 - cAIber - INFO - Assessing indicator: Analysis of malicious HWP cases of 'APT37' group distributed through K messenger
+2025-08-22 21:56:12,042 - cAIber - INFO - Assessing indicator: Analysis of malicious HWP cases of 'APT37' group distributed through K messenger
+2025-08-22 21:56:15,616 - cAIber - INFO - Assessing indicator: Analysis of malicious HWP cases of 'APT37' group distributed through K messenger
+2025-08-22 21:56:19,644 - cAIber - INFO - Completed autonomous assessment: 0 risks identified
+2025-08-22 22:07:06,993 - cAIber - INFO - Initializing Autonomous Correlation Agent
+2025-08-22 22:07:07,097 - cAIber - INFO - Neo4j connectivity verified!
+2025-08-22 22:07:07,134 - cAIber - INFO - Starting autonomous threat correlation
+2025-08-22 22:07:07,134 - cAIber - INFO - Assessing vulnerability: GHSA-mv33-9f6j-pfmc
+2025-08-22 22:07:16,247 - cAIber - INFO - Assessing vulnerability: GHSA-pr72-8fxw-xx22
+2025-08-22 22:07:21,962 - cAIber - INFO - Assessing vulnerability: GHSA-g4vp-4gqr-7v8c
+2025-08-22 22:07:27,717 - cAIber - INFO - Assessing vulnerability: GHSA-8gwm-58g9-j8pw
+2025-08-22 22:07:34,115 - cAIber - INFO - Assessing indicator: Analysis of malicious HWP cases of 'APT37' group distributed through K messenger
+2025-08-22 22:07:38,346 - cAIber - INFO - Assessing indicator: Analysis of malicious HWP cases of 'APT37' group distributed through K messenger
+2025-08-22 22:07:43,506 - cAIber - INFO - Assessing indicator: Analysis of malicious HWP cases of 'APT37' group distributed through K messenger
+2025-08-22 22:07:47,969 - cAIber - INFO - Assessing indicator: Analysis of malicious HWP cases of 'APT37' group distributed through K messenger
+2025-08-22 22:07:53,731 - cAIber - INFO - Assessing indicator: Analysis of malicious HWP cases of 'APT37' group distributed through K messenger
+2025-08-22 22:07:58,795 - cAIber - INFO - Completed autonomous assessment: 0 risks identified
+2025-08-22 22:27:49,379 - cAIber - INFO - Initializing Autonomous Correlation Agent
+2025-08-22 22:27:49,533 - cAIber - INFO - Neo4j connectivity verified!
+2025-08-22 22:27:49,624 - cAIber - INFO - Starting autonomous threat correlation
+2025-08-22 22:27:49,625 - cAIber - INFO - Assessing vulnerability: GHSA-mv33-9f6j-pfmc
+2025-08-22 22:27:53,493 - cAIber - INFO - Assessing vulnerability: GHSA-pr72-8fxw-xx22
+2025-08-22 22:27:58,314 - cAIber - INFO - Assessing vulnerability: GHSA-g4vp-4gqr-7v8c
+2025-08-22 22:28:02,919 - cAIber - INFO - Assessing vulnerability: GHSA-8gwm-58g9-j8pw
+2025-08-22 22:28:06,416 - cAIber - INFO - Assessing indicator: Analysis of malicious HWP cases of 'APT37' group distributed through K messenger
+2025-08-22 22:28:10,020 - cAIber - INFO - Assessing indicator: Analysis of malicious HWP cases of 'APT37' group distributed through K messenger
+2025-08-22 22:28:14,155 - cAIber - INFO - Assessing indicator: Analysis of malicious HWP cases of 'APT37' group distributed through K messenger
+2025-08-22 22:28:17,521 - cAIber - INFO - Assessing indicator: Analysis of malicious HWP cases of 'APT37' group distributed through K messenger
+2025-08-22 22:28:21,545 - cAIber - INFO - Assessing indicator: Analysis of malicious HWP cases of 'APT37' group distributed through K messenger
+2025-08-22 22:28:24,717 - cAIber - INFO - Completed autonomous assessment: 0 risks identified
+2025-08-22 23:04:16,760 - cAIber - INFO - Initializing Autonomous Correlation Agent
+2025-08-22 23:04:16,917 - cAIber - INFO - Neo4j connectivity verified!
+2025-08-22 23:04:17,008 - cAIber - INFO - Starting autonomous threat correlation
+2025-08-22 23:04:17,009 - cAIber - INFO - Assessing vulnerability: GHSA-8gwm-58g9-j8pw
+2025-08-22 23:04:21,697 - cAIber - INFO - Assessing indicator: CVE-2025-53770 and CVE-2025-53771: Actively Exploited SharePoint Vulnerabilities
+2025-08-22 23:04:29,200 - cAIber - INFO - Assessing indicator: CVE-2025-53770 and CVE-2025-53771: Actively Exploited SharePoint Vulnerabilities
+2025-08-22 23:04:36,871 - cAIber - INFO - Assessing indicator: CVE-2025-53770 and CVE-2025-53771: Actively Exploited SharePoint Vulnerabilities
+2025-08-22 23:04:40,691 - cAIber - INFO - Assessing indicator: CVE-2025-53770 and CVE-2025-53771: Actively Exploited SharePoint Vulnerabilities
+2025-08-22 23:04:45,300 - cAIber - INFO - Assessing indicator: CVE-2025-53770 and CVE-2025-53771: Actively Exploited SharePoint Vulnerabilities
+2025-08-22 23:04:51,528 - cAIber - INFO - Completed autonomous assessment: 0 risks identified
+2025-08-22 23:07:31,451 - cAIber - INFO - Initializing Autonomous Correlation Agent
+2025-08-22 23:07:31,583 - cAIber - INFO - Neo4j connectivity verified!
+2025-08-22 23:07:31,659 - cAIber - INFO - Starting autonomous threat correlation
+2025-08-22 23:07:31,660 - cAIber - INFO - Assessing vulnerability: GHSA-8gwm-58g9-j8pw
+2025-08-22 23:07:48,900 - cAIber - INFO - Assessing indicator: Illusory Wishes: China-nexus APT Targets the Tibetan Community
+2025-08-22 23:07:52,678 - cAIber - INFO - Assessing indicator: Illusory Wishes: China-nexus APT Targets the Tibetan Community
+2025-08-22 23:07:56,752 - cAIber - INFO - Assessing indicator: Illusory Wishes: China-nexus APT Targets the Tibetan Community
+2025-08-22 23:08:00,698 - cAIber - INFO - Assessing indicator: Illusory Wishes: China-nexus APT Targets the Tibetan Community
+2025-08-22 23:08:05,869 - cAIber - INFO - Assessing indicator: Illusory Wishes: China-nexus APT Targets the Tibetan Community
+2025-08-22 23:08:10,298 - cAIber - INFO - Completed autonomous assessment: 0 risks identified
+2025-08-22 23:10:33,738 - cAIber - INFO - STAGE 4: Threat Modeling
+2025-08-22 23:23:22,932 - cAIber - INFO - Initializing Autonomous Correlation Agent
+2025-08-22 23:23:23,040 - cAIber - INFO - Neo4j connectivity verified!
+2025-08-22 23:23:23,126 - cAIber - INFO - Starting autonomous threat correlation
+2025-08-22 23:23:23,127 - cAIber - INFO - Assessing vulnerability: GHSA-8gwm-58g9-j8pw
+2025-08-22 23:23:28,857 - cAIber - INFO - Assessing indicator: CVE-2025-53770 and CVE-2025-53771: Actively Exploited SharePoint Vulnerabilities
+2025-08-22 23:23:32,983 - cAIber - INFO - Assessing indicator: CVE-2025-53770 and CVE-2025-53771: Actively Exploited SharePoint Vulnerabilities
+2025-08-22 23:23:36,742 - cAIber - INFO - Assessing indicator: CVE-2025-53770 and CVE-2025-53771: Actively Exploited SharePoint Vulnerabilities
+2025-08-22 23:23:41,669 - cAIber - INFO - Assessing indicator: CVE-2025-53770 and CVE-2025-53771: Actively Exploited SharePoint Vulnerabilities
+2025-08-22 23:23:46,428 - cAIber - INFO - Assessing indicator: CVE-2025-53770 and CVE-2025-53771: Actively Exploited SharePoint Vulnerabilities
+2025-08-22 23:23:50,686 - cAIber - INFO - Completed autonomous assessment: 0 risks identified
+2025-08-22 23:26:23,303 - cAIber - INFO - Initializing Autonomous Correlation Agent
+2025-08-22 23:26:23,400 - cAIber - INFO - Neo4j connectivity verified!
+2025-08-22 23:26:23,425 - cAIber - INFO - Starting autonomous threat correlation
+2025-08-22 23:26:23,425 - cAIber - INFO - Assessing vulnerability: GHSA-8gwm-58g9-j8pw
+2025-08-22 23:26:28,990 - cAIber - INFO - Assessing indicator: Illusory Wishes: China-nexus APT Targets the Tibetan Community
+2025-08-22 23:26:35,215 - cAIber - INFO - Assessing indicator: Illusory Wishes: China-nexus APT Targets the Tibetan Community
+2025-08-22 23:26:40,589 - cAIber - INFO - Assessing indicator: Illusory Wishes: China-nexus APT Targets the Tibetan Community
+2025-08-22 23:26:43,867 - cAIber - INFO - Assessing indicator: Illusory Wishes: China-nexus APT Targets the Tibetan Community
+2025-08-22 23:26:48,006 - cAIber - INFO - Assessing indicator: Illusory Wishes: China-nexus APT Targets the Tibetan Community
+2025-08-22 23:26:51,534 - cAIber - INFO - Completed autonomous assessment: 0 risks identified
+2025-08-22 23:36:00,651 - cAIber - INFO - Initializing Autonomous Correlation Agent
+2025-08-22 23:36:00,736 - cAIber - INFO - Neo4j connectivity verified!
+2025-08-22 23:36:00,777 - cAIber - INFO - Starting autonomous threat correlation
+2025-08-22 23:36:00,777 - cAIber - INFO - Assessing vulnerability: GHSA-pr72-8fxw-xx22
+2025-08-22 23:36:06,293 - cAIber - INFO - Assessing vulnerability: GHSA-8gwm-58g9-j8pw
+2025-08-22 23:36:11,013 - cAIber - INFO - Assessing indicator: CVE-2025-53770 and CVE-2025-53771: Actively Exploited SharePoint Vulnerabilities
+2025-08-22 23:36:15,089 - cAIber - INFO - Assessing indicator: CVE-2025-53770 and CVE-2025-53771: Actively Exploited SharePoint Vulnerabilities
+2025-08-22 23:36:19,052 - cAIber - INFO - Assessing indicator: CVE-2025-53770 and CVE-2025-53771: Actively Exploited SharePoint Vulnerabilities
+2025-08-22 23:36:24,535 - cAIber - INFO - Assessing indicator: CVE-2025-53770 and CVE-2025-53771: Actively Exploited SharePoint Vulnerabilities
+2025-08-22 23:36:28,773 - cAIber - INFO - Assessing indicator: CVE-2025-53770 and CVE-2025-53771: Actively Exploited SharePoint Vulnerabilities
+2025-08-22 23:36:32,867 - cAIber - INFO - Completed autonomous assessment: 0 risks identified
+2025-08-22 23:41:11,396 - cAIber - INFO - Initializing Autonomous Correlation Agent
+2025-08-22 23:41:11,482 - cAIber - INFO - Neo4j connectivity verified!
+2025-08-22 23:41:11,506 - cAIber - INFO - Starting autonomous threat correlation
+2025-08-22 23:41:11,506 - cAIber - INFO - Assessing vulnerability: GHSA-8gwm-58g9-j8pw
+2025-08-22 23:41:16,527 - cAIber - INFO - Assessing indicator: CVE-2025-53770 and CVE-2025-53771: Actively Exploited SharePoint Vulnerabilities
+2025-08-22 23:41:20,702 - cAIber - INFO - Assessing indicator: CVE-2025-53770 and CVE-2025-53771: Actively Exploited SharePoint Vulnerabilities
+2025-08-22 23:41:25,357 - cAIber - INFO - Assessing indicator: CVE-2025-53770 and CVE-2025-53771: Actively Exploited SharePoint Vulnerabilities
+2025-08-22 23:41:29,306 - cAIber - INFO - Assessing indicator: CVE-2025-53770 and CVE-2025-53771: Actively Exploited SharePoint Vulnerabilities
+2025-08-22 23:41:34,490 - cAIber - INFO - Assessing indicator: CVE-2025-53770 and CVE-2025-53771: Actively Exploited SharePoint Vulnerabilities
+2025-08-22 23:41:38,638 - cAIber - INFO - Completed autonomous assessment: 0 risks identified
+2025-08-22 23:41:38,660 - cAIber - INFO - STAGE 4: Threat Modeling

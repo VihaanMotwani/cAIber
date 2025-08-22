@@ -12,6 +12,7 @@ from .services.autonomous_correlation_agent import AutonomousCorrelationAgent
 from .services.pir_generator_main import PIRGenerator
 from .services.simple_pipeline import run_pipeline
 from .services.threat_modeling import generate_threat_model
+from .services.logger_config import logger
 
 load_dotenv()
 
@@ -64,12 +65,7 @@ def generate_pirs():
         if not result.get("success", True):
             raise HTTPException(status_code=500, detail=result.get("error", "PIR generation failed"))
             
-        return {
-            "pirs": result,
-            "success": True,
-            "mock_data": result.get("mock_data", False),
-            "neo4j_connected": "neo4j_error" not in locals()
-        }
+        return result
 
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"PIR generation failed: {str(e)}")
@@ -80,7 +76,7 @@ def generate_pirs():
 # ================================
 
 @app.post("/collect-threats", status_code=200)
-def collect_threats(pir_keywords: Dict[str, List[str]] = Body(...)):
+def collect_threats(pir_keywords: dict):
     """
     Stage 2: Run collection agents (OTX, CVE, GitHub)
     to build threat landscape filtered by PIR keywords.
@@ -92,21 +88,19 @@ def collect_threats(pir_keywords: Dict[str, List[str]] = Body(...)):
         nvd_api_key = os.getenv("NVD_API_KEY")
 
         # Flatten dict into one keyword set
-        flat_keywords = {kw for values in pir_keywords.values() for kw in values}
-
         # Pass PIR keywords into agents
         agents = [
-            CVEAgent(api_key=nvd_api_key, keywords=flat_keywords),
-            GitHubSecurityAgent(github_token=github_token, keywords=flat_keywords)
+            CVEAgent(api_key=nvd_api_key, keywords=pir_keywords),
+            GitHubSecurityAgent(github_token=github_token, keywords=pir_keywords)
         ]
         if otx_api_key:
-            agents.append(OTXAgent(api_key=otx_api_key, keywords=flat_keywords))
+            agents.append(OTXAgent(api_key=otx_api_key, keywords=pir_keywords))
 
-        builder = ThreatLandscapeBuilder(agents, pir_keywords=flat_keywords)
+        builder = ThreatLandscapeBuilder(agents, pir_keywords=pir_keywords)
         landscape = builder.build_threat_landscape()
         return {"landscape": landscape}
 
-    except Exception as e:
+    except HTTPException as e:
         raise HTTPException(status_code=500, detail=str(e))
 
 @app.post("/collect-and-correlate", status_code=200)
@@ -232,6 +226,27 @@ def run_complete_pipeline(skip_stage1: bool = False, autonomous_correlation: boo
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
 
+
+@app.post("/threat-model", status_code=200)
+def threat_model_endpoint(intelligence_data: dict):
+    """
+    Stage 4: Threat Modeling
+    Accepts the combined intelligence data from previous stages:
+    - pirs
+    - keywords
+    - threat_landscape
+    - risk_assessments
+    - executive_summary
+
+    Returns: Generated threat model JSON
+    """
+    try:
+        logger.info("STAGE 4: Threat Modeling")
+        threat_model = generate_threat_model(intelligence_data)
+        return {"threat_model": threat_model}
+    except Exception as e:
+        logger.error(f"Threat modeling failed: {str(e)}", exc_info=True)
+        raise HTTPException(status_code=500, detail=f"Threat modeling failed: {str(e)}")
 
 # ================================
 @app.get("/")

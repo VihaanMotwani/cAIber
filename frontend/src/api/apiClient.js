@@ -49,6 +49,11 @@ export const api = {
     const response = await apiClient.post('/run-complete-pipeline')
     return response.data
   },
+
+  threatModel: async (intelligenceData) => {
+    const response = await apiClient.post('/threat-model', intelligenceData)
+    return response.data
+  }
 }
 
 export default apiClient

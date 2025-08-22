@@ -4,7 +4,7 @@ import toast from 'react-hot-toast'
 
 export const usePipelineStore = create((set, get) => ({
   // State
-  status: 'idle', // idle, running, completed, error
+  status: 'idle',
   currentStage: null,
   stageProgress: {
     stage1: { status: 'pending', data: null },
@@ -56,33 +56,26 @@ export const usePipelineStore = create((set, get) => ({
 
   runFullPipeline: async () => {
     const startTime = Date.now()
-    set({ 
-      status: 'running', 
+    set({
+      status: 'running',
       currentStage: 'stage1',
       startTime,
-      error: null 
+      error: null
     })
 
     try {
       toast.loading('Initializing threat analysis pipeline...', { id: 'pipeline' })
-      
+
       // Stage 1: Generate PIRs
       set({ currentStage: 'stage1' })
       get().updateStageProgress('stage1', 'running')
       toast.loading('Stage 1: Generating Priority Intelligence Requirements...', { id: 'pipeline' })
-      
+
       const pirsResponse = await api.generatePIRs()
       const pirs = pirsResponse.pirs
+      const keywords = pirsResponse.keywords
       get().updateStageProgress('stage1', 'completed', pirs)
-      
-      // Extract keywords from PIRs (mock for now)
-      const keywords = {
-        technologies: ['kubernetes', 'azure', 'docker', 'aws'],
-        threats: ['ransomware', 'phishing', 'supply-chain'],
-        geographies: ['europe', 'us-east', 'asia-pacific'],
-        compliance: ['gdpr', 'hipaa', 'pci-dss']
-      }
-      
+
       set((state) => ({
         results: { ...state.results, pirs, keywords }
       }))
@@ -91,11 +84,11 @@ export const usePipelineStore = create((set, get) => ({
       set({ currentStage: 'stage2' })
       get().updateStageProgress('stage2', 'running')
       toast.loading('Stage 2: Collecting threat intelligence from multiple sources...', { id: 'pipeline' })
-      
+
       const threatsResponse = await api.collectThreats(keywords)
       const threatLandscape = threatsResponse.landscape
       get().updateStageProgress('stage2', 'completed', threatLandscape)
-      
+
       set((state) => ({
         results: { ...state.results, threatLandscape }
       }))
@@ -104,44 +97,31 @@ export const usePipelineStore = create((set, get) => ({
       set({ currentStage: 'stage3' })
       get().updateStageProgress('stage3', 'running')
       toast.loading('Stage 3: Correlating threats with organizational context...', { id: 'pipeline' })
-      
+
       const correlationResponse = await api.correlateThreats(threatLandscape)
       const riskAssessments = correlationResponse.assessments
       get().updateStageProgress('stage3', 'completed', riskAssessments)
-      
-      // Stage 4: Threat Modeling (mock for now)
+
+      set((state) => ({
+        results: { ...state.results, riskAssessments }
+      }))
+
+      // Stage 4: Threat Modeling (REAL API call now)
       set({ currentStage: 'stage4' })
       get().updateStageProgress('stage4', 'running')
       toast.loading('Stage 4: Generating comprehensive threat model...', { id: 'pipeline' })
-      
-      // Simulate threat modeling
-      await new Promise(resolve => setTimeout(resolve, 2000))
-      const threatModel = {
-        attack_paths: [
-          {
-            path_description: "Supply chain attack via compromised dependency",
-            steps: [
-              {
-                step: 1,
-                action: "Attacker compromises popular npm package",
-                mitre_attack: "Initial Access (T1195): Supply Chain Compromise",
-                stride_classification: "Tampering",
-                justification: "Malicious code injection into trusted component"
-              },
-              {
-                step: 2,
-                action: "Malicious package deployed to production",
-                mitre_attack: "Execution (T1059): Command and Scripting Interpreter",
-                stride_classification: "Elevation of Privilege",
-                justification: "Code executes with application privileges"
-              }
-            ]
-          }
-        ]
-      }
-      
+
+      const threatModelResponse = await api.threatModel({
+        pirs,
+        keywords,
+        threat_landscape: threatLandscape,
+        risk_assessments: riskAssessments,
+        executive_summary: "Critical risks detected in cloud infrastructure and Kubernetes deployments. Recommend immediate patching of CVE-2025-1234 and hardening of container configurations."
+      })
+
+      const threatModel = threatModelResponse.threat_model
       get().updateStageProgress('stage4', 'completed', threatModel)
-      
+
       const endTime = Date.now()
       set({
         status: 'completed',
@@ -149,18 +129,17 @@ export const usePipelineStore = create((set, get) => ({
         endTime,
         results: {
           ...get().results,
-          riskAssessments,
           threatModel,
           executiveSummary: "Analysis complete: Identified critical threats requiring immediate attention."
         }
       })
-      
+
       toast.success(`Pipeline completed in ${((endTime - startTime) / 1000).toFixed(1)} seconds`, { id: 'pipeline' })
-      
+
     } catch (error) {
       console.error('Pipeline error:', error)
-      set({ 
-        status: 'error', 
+      set({
+        status: 'error',
         error: error.message,
         currentStage: null,
         endTime: Date.now()
@@ -171,20 +150,20 @@ export const usePipelineStore = create((set, get) => ({
 
   runStage: async (stage) => {
     set({ status: 'running', currentStage: stage })
-    
+
     try {
-      switch(stage) {
+      switch (stage) {
         case 'stage1':
           const pirsResponse = await api.generatePIRs()
-          get().updateStageProgress('stage1', 'completed', pirsResponse.pirs)
+          const { pirs, keywords } = pirsResponse
+          get().updateStageProgress('stage1', 'completed', { pirs, keywords })
           set((state) => ({
-            results: { ...state.results, pirs: pirsResponse.pirs }
+            results: { ...state.results, pirs, keywords }
           }))
           toast.success('PIRs generated successfully')
           break
-          
+
         case 'stage2':
-          // Need keywords from stage 1
           if (!get().results.keywords) {
             throw new Error('Keywords required from Stage 1')
           }
@@ -195,9 +174,8 @@ export const usePipelineStore = create((set, get) => ({
           }))
           toast.success('Threats collected successfully')
           break
-          
+
         case 'stage3':
-          // Need threat landscape from stage 2
           if (!get().results.threatLandscape) {
             throw new Error('Threat landscape required from Stage 2')
           }
@@ -208,13 +186,53 @@ export const usePipelineStore = create((set, get) => ({
           }))
           toast.success('Risk correlation completed')
           break
-          
+
+        case 'stage4':
+          if (!get().results.riskAssessments) {
+            throw new Error('Risk assessments required from Stage 3')
+          }
+
+          // FIX: Use correct variable names from results
+          const {
+            pirs: stagePirs,
+            keywords: stageKeywords,
+            threatLandscape: stageThreatLandscape,
+            riskAssessments: stageRiskAssessments,
+            executiveSummary: stageExecutiveSummary
+          } = get().results
+
+          // Add validation to ensure we have the required data
+          if (!stagePirs) {
+            throw new Error('PIRs required from Stage 1')
+          }
+          if (!stageKeywords) {
+            throw new Error('Keywords required from Stage 1')
+          }
+          if (!stageThreatLandscape) {
+            throw new Error('Threat landscape required from Stage 2')
+          }
+
+          const threatModelResponse = await api.threatModel({
+            pirs: stagePirs,
+            keywords: stageKeywords,
+            threat_landscape: stageThreatLandscape,
+            risk_assessments: stageRiskAssessments,
+            executive_summary: stageExecutiveSummary || "Generated threat model based on collected intelligence."
+          })
+
+          get().updateStageProgress('stage4', 'completed', threatModelResponse.threat_model)
+          set((state) => ({
+            results: { ...state.results, threatModel: threatModelResponse.threat_model }
+          }))
+          toast.success('Threat model generated successfully')
+          break
+
         default:
           throw new Error('Invalid stage')
       }
-      
+
       set({ status: 'idle', currentStage: null })
-      
+
     } catch (error) {
       console.error('Stage error:', error)
       set({ status: 'error', error: error.message, currentStage: null })
