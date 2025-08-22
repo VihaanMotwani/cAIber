@@ -18,103 +18,120 @@ const OrganizationalDNA = () => {
   })
   const [viewMode, setViewMode] = useState('3d')
 
-  // Check if Stage 1 (PIR generation + DNA building) has completed
-  const hasStage1Completed = stageProgress.stage1.status === 'completed' || results?.pirs
-
+  // Always try to fetch data, but handle empty state gracefully
   useEffect(() => {
-    // Only fetch graph data if Stage 1 has completed
-    if (hasStage1Completed) {
-      fetchGraphData()
-    }
-  }, [hasStage1Completed])
+    fetchGraphData()
+  }, [])
 
   const fetchGraphData = async () => {
     setLoading(true)
+    
+    // Define mock data at function scope so it's accessible in both try and catch blocks
+    const mockData = {
+      nodes: [
+        { id: 'org-root', label: 'TechCorp Inc.', type: 'organization', size: 25 },
+        
+        // Technologies
+        { id: 'cloud', label: 'Cloud Infrastructure', type: 'technology', size: 18 },
+        { id: 'aws', label: 'AWS', type: 'technology', size: 12 },
+        { id: 'azure', label: 'Azure', type: 'technology', size: 10 },
+        { id: 'k8s', label: 'Kubernetes', type: 'technology', size: 12 },
+        { id: 'docker', label: 'Docker', type: 'technology', size: 8 },
+        { id: 'postgres', label: 'PostgreSQL', type: 'technology', size: 10 },
+        { id: 'redis', label: 'Redis', type: 'technology', size: 8 },
+        
+        // Critical Assets
+        { id: 'assets-root', label: 'Critical Assets', type: 'asset', size: 18 },
+        { id: 'customer-db', label: 'Customer Database', type: 'asset', size: 15 },
+        { id: 'payment-sys', label: 'Payment System', type: 'asset', size: 15 },
+        { id: 'auth-service', label: 'Auth Service', type: 'asset', size: 12 },
+        { id: 'api-gateway', label: 'API Gateway', type: 'asset', size: 12 },
+        
+        // Compliance
+        { id: 'compliance-root', label: 'Compliance Framework', type: 'compliance', size: 15 },
+        { id: 'gdpr', label: 'GDPR', type: 'compliance', size: 10 },
+        { id: 'pci-dss', label: 'PCI-DSS', type: 'compliance', size: 10 },
+        { id: 'sox', label: 'SOX', type: 'compliance', size: 8 },
+        { id: 'hipaa', label: 'HIPAA', type: 'compliance', size: 8 },
+        
+        // Threat Landscape
+        { id: 'threats-root', label: 'Threat Landscape', type: 'threat', size: 15 },
+        { id: 'ransomware', label: 'Ransomware Risk', type: 'threat', size: 10 },
+        { id: 'supply-chain', label: 'Supply Chain Attack', type: 'threat', size: 10 },
+        { id: 'phishing', label: 'Phishing Campaign', type: 'threat', size: 8 },
+        { id: 'insider', label: 'Insider Threat', type: 'threat', size: 8 },
+      ],
+      links: [
+        // Organization connections
+        { source: 'org-root', target: 'cloud' },
+        { source: 'org-root', target: 'assets-root' },
+        { source: 'org-root', target: 'compliance-root' },
+        { source: 'org-root', target: 'threats-root' },
+        
+        // Technology connections
+        { source: 'cloud', target: 'aws' },
+        { source: 'cloud', target: 'azure' },
+        { source: 'cloud', target: 'k8s' },
+        { source: 'k8s', target: 'docker' },
+        { source: 'aws', target: 'postgres' },
+        { source: 'aws', target: 'redis' },
+        
+        // Asset connections
+        { source: 'assets-root', target: 'customer-db' },
+        { source: 'assets-root', target: 'payment-sys' },
+        { source: 'assets-root', target: 'auth-service' },
+        { source: 'assets-root', target: 'api-gateway' },
+        { source: 'customer-db', target: 'postgres' },
+        { source: 'auth-service', target: 'redis' },
+        
+        // Compliance connections
+        { source: 'compliance-root', target: 'gdpr' },
+        { source: 'compliance-root', target: 'pci-dss' },
+        { source: 'compliance-root', target: 'sox' },
+        { source: 'compliance-root', target: 'hipaa' },
+        { source: 'customer-db', target: 'gdpr' },
+        { source: 'payment-sys', target: 'pci-dss' },
+        
+        // Threat connections
+        { source: 'threats-root', target: 'ransomware' },
+        { source: 'threats-root', target: 'supply-chain' },
+        { source: 'threats-root', target: 'phishing' },
+        { source: 'threats-root', target: 'insider' },
+        { source: 'ransomware', target: 'customer-db' },
+        { source: 'supply-chain', target: 'docker' },
+        { source: 'phishing', target: 'auth-service' },
+      ]
+    }
+
     try {
       // Fetch real data from the backend
       console.log('Fetching organizational DNA...')
       const graphData = await api.getOrganizationalDNA()
       console.log('Received graph data:', graphData)
       
-      // If the API call fails or returns no data, use mock as fallback
-      const mockData = graphData || {
-        nodes: [
-          { id: 'org-root', label: 'TechCorp Inc.', type: 'organization', val: 25, color: '#0ea5e9' },
-          
-          // Technologies
-          { id: 'cloud', label: 'Cloud Infrastructure', type: 'technology', val: 18, color: '#14b8a6' },
-          { id: 'aws', label: 'AWS', type: 'technology', val: 12, color: '#14b8a6' },
-          { id: 'azure', label: 'Azure', type: 'technology', val: 10, color: '#14b8a6' },
-          { id: 'k8s', label: 'Kubernetes', type: 'technology', val: 12, color: '#14b8a6' },
-          { id: 'docker', label: 'Docker', type: 'technology', val: 8, color: '#14b8a6' },
-          { id: 'postgres', label: 'PostgreSQL', type: 'technology', val: 10, color: '#14b8a6' },
-          { id: 'redis', label: 'Redis', type: 'technology', val: 8, color: '#14b8a6' },
-          
-          // Critical Assets
-          { id: 'assets-root', label: 'Critical Assets', type: 'asset', val: 18, color: '#8b5cf6' },
-          { id: 'customer-db', label: 'Customer Database', type: 'asset', val: 15, color: '#8b5cf6' },
-          { id: 'payment-sys', label: 'Payment System', type: 'asset', val: 15, color: '#8b5cf6' },
-          { id: 'auth-service', label: 'Auth Service', type: 'asset', val: 12, color: '#8b5cf6' },
-          { id: 'api-gateway', label: 'API Gateway', type: 'asset', val: 12, color: '#8b5cf6' },
-          
-          // Compliance
-          { id: 'compliance-root', label: 'Compliance Framework', type: 'compliance', val: 15, color: '#f59e0b' },
-          { id: 'gdpr', label: 'GDPR', type: 'compliance', val: 10, color: '#f59e0b' },
-          { id: 'pci-dss', label: 'PCI-DSS', type: 'compliance', val: 10, color: '#f59e0b' },
-          { id: 'sox', label: 'SOX', type: 'compliance', val: 8, color: '#f59e0b' },
-          { id: 'hipaa', label: 'HIPAA', type: 'compliance', val: 8, color: '#f59e0b' },
-          
-          // Threat Landscape
-          { id: 'threats-root', label: 'Threat Landscape', type: 'threat', val: 15, color: '#ef4444' },
-          { id: 'ransomware', label: 'Ransomware Risk', type: 'threat', val: 10, color: '#ef4444' },
-          { id: 'supply-chain', label: 'Supply Chain Attack', type: 'threat', val: 10, color: '#ef4444' },
-          { id: 'phishing', label: 'Phishing Campaign', type: 'threat', val: 8, color: '#ef4444' },
-          { id: 'insider', label: 'Insider Threat', type: 'threat', val: 8, color: '#ef4444' },
-        ],
-        links: [
-          // Organization connections
-          { source: 'org-root', target: 'cloud', value: 5 },
-          { source: 'org-root', target: 'assets-root', value: 5 },
-          { source: 'org-root', target: 'compliance-root', value: 4 },
-          { source: 'org-root', target: 'threats-root', value: 3 },
-          
-          // Technology connections
-          { source: 'cloud', target: 'aws', value: 3 },
-          { source: 'cloud', target: 'azure', value: 3 },
-          { source: 'cloud', target: 'k8s', value: 3 },
-          { source: 'k8s', target: 'docker', value: 2 },
-          { source: 'aws', target: 'postgres', value: 2 },
-          { source: 'aws', target: 'redis', value: 2 },
-          
-          // Asset connections
-          { source: 'assets-root', target: 'customer-db', value: 3 },
-          { source: 'assets-root', target: 'payment-sys', value: 3 },
-          { source: 'assets-root', target: 'auth-service', value: 3 },
-          { source: 'assets-root', target: 'api-gateway', value: 3 },
-          { source: 'customer-db', target: 'postgres', value: 2 },
-          { source: 'auth-service', target: 'redis', value: 2 },
-          
-          // Compliance connections
-          { source: 'compliance-root', target: 'gdpr', value: 2 },
-          { source: 'compliance-root', target: 'pci-dss', value: 2 },
-          { source: 'compliance-root', target: 'sox', value: 2 },
-          { source: 'compliance-root', target: 'hipaa', value: 2 },
-          { source: 'customer-db', target: 'gdpr', value: 2 },
-          { source: 'payment-sys', target: 'pci-dss', value: 2 },
-          
-          // Threat connections
-          { source: 'threats-root', target: 'ransomware', value: 2 },
-          { source: 'threats-root', target: 'supply-chain', value: 2 },
-          { source: 'threats-root', target: 'phishing', value: 2 },
-          { source: 'threats-root', target: 'insider', value: 2 },
-          { source: 'ransomware', target: 'customer-db', value: 1 },
-          { source: 'supply-chain', target: 'docker', value: 1 },
-          { source: 'phishing', target: 'auth-service', value: 1 },
-        ]
+      // Debug: Log what we received
+      console.log('🔍 Received graph data:', graphData)
+      console.log('🔍 Nodes length:', graphData?.nodes?.length)
+      console.log('🔍 Has data flag:', graphData?.has_data)
+      
+      // Check if we got real data or need to show empty state
+      if (!graphData || graphData.has_data === false || !graphData.nodes || graphData.nodes.length === 0) {
+        console.log('❌ No organizational DNA data available')
+        setGraphData(null)
+        setStats({
+          totalNodes: 0,
+          technologies: 0,
+          assets: 0,
+          threats: 0,
+          compliance: 0
+        })
+        return
       }
       
-      const finalData = graphData || mockData
-      setGraphData(finalData)
+      console.log('✅ Setting graph data with', graphData.nodes.length, 'nodes')
+      
+      // Use real data since we passed validation
+      setGraphData(graphData)
       
       // Use stats from API if available, otherwise calculate from nodes
       if (graphData?.stats) {
@@ -129,13 +146,13 @@ const OrganizationalDNA = () => {
         })
       } else {
         // Fallback to calculating from nodes
-        const nodeTypes = finalData.nodes.reduce((acc, node) => {
+        const nodeTypes = graphData.nodes.reduce((acc, node) => {
           acc[node.type] = (acc[node.type] || 0) + 1
           return acc
         }, {})
         
         setStats({
-          totalNodes: finalData.nodes.length,
+          totalNodes: graphData.nodes.length,
           technologies: nodeTypes.technology || 0,
           assets: nodeTypes.asset || 0,
           threats: nodeTypes.threat || 0,
@@ -160,8 +177,8 @@ const OrganizationalDNA = () => {
     }
   }
 
-  // Show empty state if Stage 1 hasn't been completed
-  if (!hasStage1Completed) {
+  // Show empty state only if explicitly no data
+  if (!graphData) {
     return (
       <div className="space-y-6">
         <motion.div
@@ -184,16 +201,16 @@ const OrganizationalDNA = () => {
             <Network className="w-16 h-16 mx-auto text-gray-500 mb-4" />
             <h2 className="text-2xl font-orbitron text-gray-400 mb-2">Organizational DNA Not Built</h2>
             <p className="text-gray-500 font-mono mb-4">
-              The knowledge graph is built during Stage 1 of the threat analysis pipeline
+              Upload documents and run analysis to build the knowledge graph
             </p>
             <div className="inline-flex items-center gap-2 px-4 py-2 bg-slate-800 rounded-lg border border-slate-700">
               <Play className="w-4 h-4 text-primary-500" />
               <span className="text-sm text-slate-300 font-mono">
-                Go to Dashboard → Click "Initiate Threat Analysis"
+                Go to Dashboard → Upload Documents → Run Analysis
               </span>
             </div>
             <p className="text-xs text-slate-500 mt-3 font-mono">
-              This will extract entities and relationships from your documents
+              This will extract entities and relationships from your uploaded documents
             </p>
           </div>
         </div>

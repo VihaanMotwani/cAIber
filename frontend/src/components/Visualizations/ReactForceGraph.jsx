@@ -1,13 +1,41 @@
-import React, { useRef, useEffect, useState } from 'react'
-import * as d3 from 'd3'
+import React, { useRef, useEffect, useState, useCallback } from 'react'
+import ForceGraph2D from 'react-force-graph-2d'
 import { ZoomIn, ZoomOut, RefreshCw, RotateCw } from 'lucide-react'
 
-const SimpleKnowledgeGraph = ({ graphData, onRefresh }) => {
-  const svgRef = useRef()
+const ReactForceGraph = ({ graphData, onRefresh }) => {
+  const fgRef = useRef()
   const [selectedNode, setSelectedNode] = useState(null)
   
+  // Debug the data
+  console.log('ReactForceGraph received data:', graphData)
+  if (graphData?.nodes) {
+    console.log('First node:', graphData.nodes[0])
+    console.log('First link:', graphData.links[0])
+    console.log('Node count:', graphData.nodes.length)
+    console.log('Link count:', graphData.links.length)
+  }
+  
+  // Limit data for performance - take top nodes by size
+  let processedData = graphData
+  if (graphData && graphData.nodes && graphData.nodes.length > 50) {
+    const topNodes = graphData.nodes
+      .sort((a, b) => (b.size || 0) - (a.size || 0))
+      .slice(0, 50)
+    
+    const nodeIds = new Set(topNodes.map(n => n.id))
+    const filteredLinks = graphData.links.filter(link => 
+      nodeIds.has(link.source) && nodeIds.has(link.target)
+    )
+    
+    processedData = {
+      nodes: topNodes,
+      links: filteredLinks
+    }
+    console.log('Limited to top 50 nodes:', processedData.nodes.length, 'nodes,', processedData.links.length, 'links')
+  }
+  
   // Mock data if no graphData provided
-  const data = graphData || {
+  const data = processedData || {
     nodes: [
       { id: 'org-root', label: 'TechCorp Inc.', type: 'organization', size: 25 },
       { id: 'cloud', label: 'Cloud Infrastructure', type: 'technology', size: 18 },
@@ -54,161 +82,25 @@ const SimpleKnowledgeGraph = ({ graphData, onRefresh }) => {
     }
   }
 
-  useEffect(() => {
-    if (!svgRef.current || !data || !data.nodes || !data.links) {
-      console.log('SimpleKnowledgeGraph: Missing data', {
-        hasRef: !!svgRef.current,
-        hasData: !!data,
-        nodeCount: data?.nodes?.length,
-        linkCount: data?.links?.length
-      })
-      return
-    }
-
-    console.log('SimpleKnowledgeGraph: Rendering with', data.nodes.length, 'nodes and', data.links.length, 'links')
-
-    // Only show nodes that have relationships (connected nodes)
-    const connectedNodeIds = new Set()
-    data.links.forEach(link => {
-      connectedNodeIds.add(link.source)
-      connectedNodeIds.add(link.target)
-    })
-    
-    const connectedNodes = data.nodes.filter(node => connectedNodeIds.has(node.id))
-    const connectedLinks = data.links.filter(link => 
-      connectedNodeIds.has(link.source) && connectedNodeIds.has(link.target)
-    )
-
-    console.log('Filtered to connected nodes only:', connectedNodes.length, 'nodes and', connectedLinks.length, 'links')
-
-    const svg = d3.select(svgRef.current)
-    svg.selectAll("*").remove()
-
-    const width = 800
-    const height = 600
-
-    // Create container for zoom/pan
-    const container = svg.append('g')
-
-    // Create zoom behavior
-    const zoom = d3.zoom()
-      .scaleExtent([0.1, 4])
-      .on('zoom', (event) => {
-        container.attr('transform', event.transform)
-      })
-
-    // Apply zoom to SVG
-    svg.call(zoom)
-
-    // Store zoom behavior for controls
-    svg.node().zoomBehavior = zoom
-
-    // Create simulation
-    const simulation = d3.forceSimulation(connectedNodes)
-      .force("link", d3.forceLink(connectedLinks).id(d => d.id).distance(80))
-      .force("charge", d3.forceManyBody().strength(-200))
-      .force("center", d3.forceCenter(width / 2, height / 2))
-      .force("collision", d3.forceCollide().radius(d => (d.size || 10) + 5))
-
-    // Create links
-    const link = container.append("g")
-      .selectAll("line")
-      .data(connectedLinks)
-      .join("line")
-      .attr("stroke", "#00ff41")
-      .attr("stroke-opacity", 0.4)
-      .attr("stroke-width", 1.5)
-
-    // Create nodes
-    const node = container.append("g")
-      .selectAll("g")
-      .data(connectedNodes)
-      .join("g")
-      .style("cursor", "pointer")
-      .call(d3.drag()
-        .on("start", dragstarted)
-        .on("drag", dragged)
-        .on("end", dragended))
-
-    // Add circles
-    node.append("circle")
-      .attr("r", d => Math.max((d.size || 10) / 2, 8))
-      .attr("fill", d => getNodeColor(d.type))
-      .attr("stroke", "#00ff41")
-      .attr("stroke-width", 1.5)
-      .on("click", (event, d) => {
-        event.stopPropagation()
-        setSelectedNode(d)
-        console.log('Clicked node:', d)
-      })
-
-    // Add labels
-    node.append("text")
-      .text(d => d.label.length > 15 ? d.label.substring(0, 15) + '...' : d.label)
-      .attr("x", 0)
-      .attr("y", d => Math.max((d.size || 10) / 2, 8) + 15)
-      .attr("text-anchor", "middle")
-      .attr("fill", "#00ff41")
-      .attr("font-size", "10px")
-      .attr("font-family", "Space Mono, monospace")
-      .style("pointer-events", "none")
-
-    // Update positions on tick
-    simulation.on("tick", () => {
-      link
-        .attr("x1", d => d.source.x)
-        .attr("y1", d => d.source.y)
-        .attr("x2", d => d.target.x)
-        .attr("y2", d => d.target.y)
-
-      node.attr("transform", d => `translate(${d.x},${d.y})`)
-    })
-
-    // Drag functions
-    function dragstarted(event, d) {
-      if (!event.active) simulation.alphaTarget(0.3).restart()
-      d.fx = d.x
-      d.fy = d.y
-    }
-
-    function dragged(event, d) {
-      d.fx = event.x
-      d.fy = event.y
-    }
-
-    function dragended(event, d) {
-      if (!event.active) simulation.alphaTarget(0)
-      d.fx = null
-      d.fy = null
-    }
-
-    // Cleanup
-    return () => {
-      simulation.stop()
-    }
-  }, [data])
+  const handleNodeClick = useCallback((node) => {
+    setSelectedNode(node)
+  }, [])
 
   const handleZoomIn = () => {
-    const svg = d3.select(svgRef.current)
-    const zoom = svg.node()?.zoomBehavior
-    if (zoom) {
-      svg.transition().call(zoom.scaleBy, 1.5)
+    if (fgRef.current) {
+      fgRef.current.zoom(fgRef.current.zoom() * 1.5)
     }
   }
 
   const handleZoomOut = () => {
-    const svg = d3.select(svgRef.current)
-    const zoom = svg.node()?.zoomBehavior
-    if (zoom) {
-      svg.transition().call(zoom.scaleBy, 0.67)
+    if (fgRef.current) {
+      fgRef.current.zoom(fgRef.current.zoom() / 1.5)
     }
   }
 
-  const handleResetZoom = () => {
-    const svg = d3.select(svgRef.current)
-    const zoom = svg.node()?.zoomBehavior
-    if (zoom) {
-      svg.transition().call(zoom.transform, d3.zoomIdentity)
+  const handleReset = () => {
+    if (fgRef.current) {
+      fgRef.current.zoomToFit(400)
     }
   }
 
@@ -221,12 +113,32 @@ const SimpleKnowledgeGraph = ({ graphData, onRefresh }) => {
   return (
     <div className="relative w-full h-full">
       <div className="w-full h-[600px] bg-black rounded-xl border border-matrix-darkgreen relative overflow-hidden">
-        <svg
-          ref={svgRef}
-          width="100%"
-          height="100%"
-          viewBox="0 0 800 600"
-          className="w-full h-full"
+        <ForceGraph2D
+          ref={fgRef}
+          graphData={data}
+          width={800}
+          height={600}
+          backgroundColor="#000000"
+          nodeLabel="label"
+          nodeId="id"
+          nodeVal={(node) => Math.max((node.size || 10), 5)}
+          nodeColor={(node) => getNodeColor(node.type)}
+          nodeRelSize={6}
+          linkColor={() => '#00ff41'}
+          linkOpacity={0.6}
+          linkWidth={1}
+          onNodeClick={handleNodeClick}
+          enableNodeDrag={true}
+          enableZoomInteraction={true}
+          enablePanInteraction={true}
+          cooldownTicks={100}
+          d3AlphaDecay={0.02}
+          d3VelocityDecay={0.3}
+          onEngineStop={() => {
+            setTimeout(() => {
+              fgRef.current?.zoomToFit(400, 50)
+            }, 100)
+          }}
         />
 
         {/* Controls */}
@@ -246,7 +158,7 @@ const SimpleKnowledgeGraph = ({ graphData, onRefresh }) => {
             <ZoomOut className="w-4 h-4 text-matrix-green" />
           </button>
           <button
-            onClick={handleResetZoom}
+            onClick={handleReset}
             className="p-2 bg-matrix-darkgray hover:bg-matrix-darkgreen rounded-lg transition-colors border border-matrix-darkgreen"
             title="Reset Zoom"
           >
@@ -289,7 +201,6 @@ const SimpleKnowledgeGraph = ({ graphData, onRefresh }) => {
               <div className="space-y-1 text-sm">
                 <p><span className="text-matrix-darkgreen">TYPE:</span> <span className="text-matrix-green font-mono">{selectedNode.type.toUpperCase()}</span></p>
                 <p><span className="text-matrix-darkgreen">SIZE:</span> <span className="text-matrix-green font-mono">{selectedNode.size}</span></p>
-                <p><span className="text-matrix-darkgreen">ID:</span> <span className="text-matrix-green font-mono text-xs">{selectedNode.id}</span></p>
               </div>
               <button 
                 onClick={() => setSelectedNode(null)}
@@ -305,4 +216,4 @@ const SimpleKnowledgeGraph = ({ graphData, onRefresh }) => {
   )
 }
 
-export default SimpleKnowledgeGraph
+export default ReactForceGraph

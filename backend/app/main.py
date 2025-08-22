@@ -219,34 +219,7 @@ def generate_pirs(payload: dict = Body(...)):
         raise HTTPException(status_code=500, detail=result.get("error", "PIR generation failed"))
 
     return result
-    Stage 1: Generate Priority Intelligence Requirements (PIRs).
-    Returns both raw PIRs and extracted keywords for collection.
-    """
-    try:
-        # Try to build organizational DNA first
-        try:
-            print("🔍 Attempting to build Organizational DNA...")
-            org_gen = OrganizationalDNAEngine(
-                neo4j_uri=os.getenv("NEO4J_URI"),
-                neo4j_user=os.getenv("NEO4J_USERNAME"),
-                neo4j_password=os.getenv("NEO4J_PASSWORD")
-            )
-            org_gen.build_organizational_dna("../documents", clear_existing=True)
-            print("✅ Organizational DNA built successfully")
-        except Exception as neo4j_error:
-            print(f"❌ Neo4j connection failed: {neo4j_error}")
-            print("⚠️  Falling back to mock data mode")
-            # Continue with PIR generation using mock data
-        
-        # Generate PIRs (will use Neo4j data if available, mock data if not)
-        pir_gen = PIRGenerator()
-        result = pir_gen.generate_pirs()
-        
-        # Handle both success and error cases
-        if not result.get("success", True):
-            raise HTTPException(status_code=500, detail=result.get("error", "PIR generation failed"))
-            
-        return result
+
 
 @app.get("/api/organizational-dna", status_code=200)
 def get_organizational_dna():
@@ -297,13 +270,13 @@ def get_organizational_dna():
                 # Calculate node size based on confidence and importance
                 confidence = record['confidence'] or 0.5
                 importance = record['importance'] or 5
-                val = int(10 + (confidence * 10) + (importance * 2))
+                size = int(10 + (confidence * 10) + (importance * 2))
                 
                 node = {
                     'id': node_id,
                     'label': record['label'],
                     'type': node_type,
-                    'val': val,
+                    'size': size,
                     'color': color_map.get(node_type, '#6b7280')
                 }
                 nodes.append(node)
@@ -342,9 +315,14 @@ def get_organizational_dna():
             node_type = node['type']
             node_types[node_type] = node_types.get(node_type, 0) + 1
         
+        # Check if we have any data
+        has_data = len(nodes) > 0
+        
         return {
             'nodes': nodes,
             'links': links,
+            'has_data': has_data,
+            'message': 'Knowledge graph data loaded successfully' if has_data else 'No organizational DNA data found. Upload documents and run analysis first.',
             'stats': {
                 'totalNodes': len(nodes),
                 'technologies': node_types.get('technology', 0),
