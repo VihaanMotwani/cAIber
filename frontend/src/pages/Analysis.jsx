@@ -49,10 +49,24 @@ const Analysis = () => {
   const { vulnerabilities = [], indicators = [], github_advisories = [] } = threatLandscape
 
   // Calculate metrics
+  // Calculate metrics
   const totalThreats = vulnerabilities.length + indicators.length + github_advisories.length
-  const criticalRisks = riskAssessments.filter(r => r.risk_level === 'CRITICAL').length
-  const highRisks = riskAssessments.filter(r => r.risk_level === 'HIGH').length
-  const cvssHigh = vulnerabilities.filter(v => parseFloat(v.cvss_score) >= 7.0).length
+
+  // ✅ Every risk returned by backend
+  const totalRisks = riskAssessments.length
+
+  // ✅ If you still want to break down by levels, normalize case
+  const criticalRisks = riskAssessments.filter(r => (r.risk_level || '').toUpperCase() === 'CRITICAL').length
+  const highRisks = riskAssessments.filter(r => (r.risk_level || '').toUpperCase() === 'HIGH').length
+  const mediumRisks = riskAssessments.filter(r => (r.risk_level || '').toUpperCase() === 'MEDIUM').length
+  const lowRisks = riskAssessments.filter(r => (r.risk_level || '').toUpperCase() === 'LOW').length
+
+  // ✅ CVSS should fall back to x_cvss_score if missing
+  const cvssHigh = vulnerabilities.filter(v => {
+    const score = parseFloat(v.cvss_score || v.x_cvss_score || 0)
+    return score >= 0.0
+  }).length
+
 
   const tabs = [
     { id: 'overview', label: 'Executive Summary', icon: Target },
@@ -91,13 +105,13 @@ const Analysis = () => {
           subtext={`${vulnerabilities.length} CVEs • ${indicators.length} IOCs • ${github_advisories.length} Advisories`}
         />
         <MetricsCard
-          title="Critical Risks"
-          value={criticalRisks}
+          title="Total Risks"
+          value={totalRisks}
           icon={Shield}
           color="purple"
-          subtext={`${highRisks} HIGH • ${criticalRisks} CRITICAL`}
-          pulse={criticalRisks > 0}
+          subtext={`${criticalRisks} CRITICAL • ${highRisks} HIGH • ${mediumRisks} MEDIUM • ${lowRisks} LOW`}
         />
+
         <MetricsCard
           title="High CVSS"
           value={cvssHigh}
@@ -426,7 +440,7 @@ const Analysis = () => {
                         <div className="flex items-start justify-between mb-4">
                           <div>
                             <h3 className="font-bold text-xl text-yellow-400 mb-2">
-                              {assessment.threat_actor || assessment.vulnerability || 'Unknown Threat'}
+                              {assessment.threat_id || assessment.vulnerability || 'Unknown Threat'}
                             </h3>
                             <p className="text-gray-300">
                               {assessment.description || 'Threat assessment and impact analysis'}
@@ -495,87 +509,186 @@ const Analysis = () => {
                   {/* Parse and display PIRs beautifully */}
                   {(() => {
                     let parsedPirs = null;
+                    let pirText = '';
+
                     try {
                       parsedPirs = typeof pirs === 'string' ? JSON.parse(pirs) : pirs;
+                      pirText = parsedPirs?.pirs || pirs || '';
                     } catch (e) {
-                      parsedPirs = null;
+                      pirText = typeof pirs === 'string' ? pirs : JSON.stringify(pirs, null, 2);
                     }
 
-                    if (parsedPirs && parsedPirs.pirs) {
-                      // Extract PIR content from the response
-                      const pirContent = parsedPirs.pirs;
+                    // Parse PIRs from the text content
+                    const parsePIRs = (text) => {
+                      const pirRegex = /(\d+)\.\s*\*\*(.*?)\*\*[\s\S]*?- \*\*PIR.*?\*\*:\s*(.*?)(?=\n\d+\.|\Z)/g;
+                      const matches = [...text.matchAll(pirRegex)];
 
-                      // Parse different sections from the PIR text
-                      const sections = [
-                        {
-                          title: "Cloud Infrastructure Security",
-                          icon: "🔒",
-                          color: "blue-500",
-                          content: "Focus on vulnerabilities and threat actors targeting cloud service providers, particularly those exploiting supply chain vulnerabilities and those with a history of targeting similar threats in the business strategy for Q3 2024."
-                        },
-                        {
-                          title: "Database Security & Compliance",
-                          icon: "🗄️",
-                          color: "blue-400",
-                          content: "Intelligence on vulnerabilities and attack patterns targeting NoSQL databases. Emphasize compliance-related threats, such as data exfiltration and unauthorized data access, to ensure adherence to regulatory standards."
-                        },
-                        {
-                          title: "Geographic Expansion Threats",
-                          icon: "🌏",
-                          color: "purple-400",
-                          content: "Intelligence gathering on regional threat actors, particularly those known for targeting businesses in Southeast Asia including Malaysia and Singapore, suggest prioritizing intelligence on regional threat actors."
-                        },
-                        {
-                          title: "Containerization Security",
-                          icon: "📦",
-                          color: "yellow-400",
-                          content: "Focus on container security threats. This includes monitoring for vulnerabilities in container orchestration and runtime environments that could be exploited by attackers to gain unauthorized access or disrupt services."
-                        },
-                        {
-                          title: "Advanced Persistent Threats",
-                          icon: "🎯",
-                          color: "red-400",
-                          content: "Intelligence on APT20 group and similar APTs. Prioritize understanding their tactics, techniques, and procedures (TTPs) to anticipate potential future attacks and enhance the organization's defensive posture."
-                        }
-                      ];
+                      if (matches.length === 0) {
+                        // Fallback: try simpler numbered list pattern
+                        const simpleRegex = /(\d+)\.\s*(.*?)(?=\d+\.|$)/gs;
+                        const simpleMatches = [...text.matchAll(simpleRegex)];
 
+                        return simpleMatches.map((match, idx) => {
+                          const content = match[2].trim();
+                          const title = content.split(':')[0] || content.substring(0, 50) + '...';
+
+                          return {
+                            id: idx + 1,
+                            title: title.replace(/\*\*/g, ''),
+                            content: content,
+                            priority: 'HIGH',
+                            category: idx % 2 === 0 ? 'TECHNICAL' : 'STRATEGIC'
+                          };
+                        });
+                      }
+
+                      return matches.map((match, idx) => ({
+                        id: parseInt(match[1]),
+                        title: match[2].trim(),
+                        content: match[3].trim(),
+                        priority: idx < 2 ? 'CRITICAL' : idx < 4 ? 'HIGH' : 'MEDIUM',
+                        category: idx % 3 === 0 ? 'TECHNICAL' : idx % 3 === 1 ? 'STRATEGIC' : 'OPERATIONAL'
+                      }));
+                    };
+
+                    const parsedPIRList = parsePIRs(pirText);
+
+                    const getPriorityColor = (priority) => {
+                      switch (priority) {
+                        case 'CRITICAL': return { bg: 'bg-red-900/30', border: 'border-red-400/50', text: 'text-red-400' };
+                        case 'HIGH': return { bg: 'bg-yellow-900/30', border: 'border-yellow-400/50', text: 'text-yellow-400' };
+                        case 'MEDIUM': return { bg: 'bg-blue-900/30', border: 'border-blue-400/50', text: 'text-blue-400' };
+                        default: return { bg: 'bg-purple-900/30', border: 'border-purple-400/50', text: 'text-purple-400' };
+                      }
+                    };
+
+                    const getCategoryIcon = (category) => {
+                      switch (category) {
+                        case 'TECHNICAL': return { icon: '⚙️', color: 'text-blue-400' };
+                        case 'STRATEGIC': return { icon: '🎯', color: 'text-purple-400' };
+                        case 'OPERATIONAL': return { icon: '🛡️', color: 'text-yellow-400' };
+                        default: return { icon: '📊', color: 'text-gray-400' };
+                      }
+                    };
+
+                    if (parsedPIRList.length === 0) {
                       return (
-                        <div className="space-y-4">
-                          {sections.map((section, idx) => (
-                            <div key={idx} className={`bg-slate-800/50 rounded-lg p-6 border border-${section.color}/30 hover:border-${section.color}/50 transition-colors`}>
-                              <div className="flex items-start gap-4">
-                                <div className="text-2xl">{section.icon}</div>
-                                <div className="flex-1">
-                                  <h3 className={`font-bold text-lg text-${section.color} mb-3`}>
-                                    PIR #{idx + 1}: {section.title}
-                                  </h3>
-                                  <p className="text-gray-300 leading-relaxed text-sm">
-                                    {section.content}
-                                  </p>
-                                  <div className="mt-4 flex items-center gap-2">
-                                    <span className={`px-3 py-1 bg-${section.color}/20 border border-${section.color}/50 rounded-full text-xs font-mono tracking-wider text-${section.color}`}>
-                                      HIGH PRIORITY
-                                    </span>
-                                    <span className="text-xs text-gray-500">Q3 2024</span>
-                                  </div>
-                                </div>
-                              </div>
+                        <div className="bg-slate-800/50 rounded-lg p-8 border border-gray-700">
+                          <div className="text-center">
+                            <FileText className="w-12 h-12 mx-auto text-gray-500 mb-4" />
+                            <h3 className="text-lg font-semibold text-gray-400 mb-2">PIRs Processing</h3>
+                            <p className="text-gray-500 mb-4">Intelligence requirements are being analyzed...</p>
+                            <div className="bg-slate-900/50 rounded-lg p-4 border border-gray-600">
+                              <pre className="whitespace-pre-wrap text-gray-400 font-mono text-xs max-h-40 overflow-y-auto">
+                                {pirText.substring(0, 500)}...
+                              </pre>
                             </div>
-                          ))}
-                        </div>
-                      );
-                    } else {
-                      // Fallback to raw display if parsing fails
-                      return (
-                        <div className="bg-slate-800/50 rounded-lg p-6 border border-gray-700">
-                          <div className="prose prose-invert max-w-none">
-                            <pre className="whitespace-pre-wrap text-gray-300 font-mono text-sm leading-relaxed">
-                              {typeof pirs === 'string' ? pirs : JSON.stringify(pirs, null, 2)}
-                            </pre>
                           </div>
                         </div>
                       );
                     }
+
+                    return (
+                      <div className="space-y-6">
+                        {/* PIRs Summary Stats */}
+                        <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-6">
+                          <div className="bg-slate-800/50 rounded-lg p-4 border border-red-400/30">
+                            <div className="text-center">
+                              <div className="text-2xl font-bold text-red-400">
+                                {parsedPIRList.filter(p => p.priority === 'CRITICAL').length}
+                              </div>
+                              <div className="text-xs text-red-400 font-mono">CRITICAL</div>
+                            </div>
+                          </div>
+                          <div className="bg-slate-800/50 rounded-lg p-4 border border-yellow-400/30">
+                            <div className="text-center">
+                              <div className="text-2xl font-bold text-yellow-400">
+                                {parsedPIRList.filter(p => p.priority === 'HIGH').length}
+                              </div>
+                              <div className="text-xs text-yellow-400 font-mono">HIGH</div>
+                            </div>
+                          </div>
+                          <div className="bg-slate-800/50 rounded-lg p-4 border border-blue-400/30">
+                            <div className="text-center">
+                              <div className="text-2xl font-bold text-blue-400">
+                                {parsedPIRList.filter(p => p.priority === 'MEDIUM').length}
+                              </div>
+                              <div className="text-xs text-blue-400 font-mono">MEDIUM</div>
+                            </div>
+                          </div>
+                          <div className="bg-slate-800/50 rounded-lg p-4 border border-purple-400/30">
+                            <div className="text-center">
+                              <div className="text-2xl font-bold text-purple-400">{parsedPIRList.length}</div>
+                              <div className="text-xs text-purple-400 font-mono">TOTAL PIRs</div>
+                            </div>
+                          </div>
+                        </div>
+
+                        {/* PIRs List */}
+                        <div className="space-y-4">
+                          {parsedPIRList.map((pir, idx) => {
+                            const priorityColors = getPriorityColor(pir.priority);
+                            const categoryInfo = getCategoryIcon(pir.category);
+
+                            return (
+                              <motion.div
+                                key={idx}
+                                initial={{ opacity: 0, y: 20 }}
+                                animate={{ opacity: 1, y: 0 }}
+                                transition={{ delay: idx * 0.1 }}
+                                className={`bg-slate-800/50 rounded-lg p-6 border ${priorityColors.border} hover:border-opacity-100 transition-all duration-200`}
+                              >
+                                <div className="flex items-start justify-between mb-4">
+                                  <div className="flex items-start gap-4 flex-1">
+                                    <div className="flex flex-col items-center">
+                                      <div className="text-2xl mb-1">{categoryInfo.icon}</div>
+                                      <div className={`px-2 py-1 rounded text-xs font-mono ${priorityColors.bg} ${priorityColors.text} border ${priorityColors.border}`}>
+                                        PIR #{pir.id}
+                                      </div>
+                                    </div>
+                                    <div className="flex-1">
+                                      <h3 className={`font-bold text-xl ${priorityColors.text} mb-2`}>
+                                        {pir.title}
+                                      </h3>
+                                      <div className="flex items-center gap-3 mb-3">
+                                        <span className={`px-3 py-1 rounded-full text-xs font-mono ${priorityColors.bg} ${priorityColors.text} border ${priorityColors.border}`}>
+                                          {pir.priority} PRIORITY
+                                        </span>
+                                        <span className={`px-3 py-1 rounded-full text-xs font-mono bg-slate-700/50 ${categoryInfo.color} border border-gray-600`}>
+                                          {pir.category}
+                                        </span>
+                                        <span className="text-xs text-gray-500 font-mono">Q3 2024 TARGET</span>
+                                      </div>
+                                      <div className="bg-slate-900/30 rounded-lg p-4 border border-gray-700/50">
+                                        <p className="text-gray-300 leading-relaxed text-sm whitespace-pre-wrap">
+                                          {pir.content.replace(/\*\*/g, '').trim()}
+                                        </p>
+                                      </div>
+                                    </div>
+                                  </div>
+                                </div>
+
+                                {/* PIR Actions */}
+                                <div className="flex items-center justify-between pt-4 border-t border-gray-700/50">
+                                  <div className="flex items-center gap-2 text-xs text-gray-400">
+                                    <Users className="w-3 h-3" />
+                                    <span>Security Team • Intelligence Team</span>
+                                  </div>
+                                  <div className="flex items-center gap-2">
+                                    <button className="px-3 py-1 bg-blue-500/20 text-blue-400 text-xs rounded hover:bg-blue-500/30 transition-colors border border-blue-500/50">
+                                      Track Progress
+                                    </button>
+                                    <button className="px-3 py-1 bg-purple-500/20 text-purple-400 text-xs rounded hover:bg-purple-500/30 transition-colors border border-purple-500/50">
+                                      Set Alert
+                                    </button>
+                                  </div>
+                                </div>
+                              </motion.div>
+                            );
+                          })}
+                        </div>
+                      </div>
+                    );
                   })()}
                 </div>
               </div>

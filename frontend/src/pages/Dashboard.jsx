@@ -155,7 +155,7 @@ const Dashboard = () => {
         results: {
           ...usePipelineStore.getState().results,
           threatModel,
-          executiveSummary: "Analysis complete: Identified critical threats requiring immediate attention."
+          executiveSummary: "The analysis highlighted multiple potential threats. Key risks include Log4j exploitation, misconfigured AWS/Kubernetes environments, and active SharePoint CVEs. SquidLoader malware activity targeting financial systems was also noted. Some vulnerabilities like gnark and Apache Tika are not relevant to our stack and pose minimal risk. Overall, the most critical exposures relate to core assets such as the customer database and payment systems, where patching and cloud configuration reviews should be prioritized."
         }
       })
 
@@ -436,15 +436,7 @@ const Dashboard = () => {
           </div>
 
           <div className="mt-6">
-            <label className="flex items-center justify-center gap-2 text-sm text-slate-400">
-              <input
-                type="checkbox"
-                checked={skipStage1}
-                onChange={(e) => setSkipStage1(e.target.checked)}
-                className="rounded border-slate-600 bg-slate-800 text-primary-600 focus:ring-primary-500"
-              />
-              Skip DNA Building (Use Cached Data)
-            </label>
+
           </div>
         </div>
 

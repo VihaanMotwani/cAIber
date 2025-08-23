@@ -254,19 +254,19 @@ class AutonomousCorrelationAgent:
         threat_type = threat.get('type', 'unknown')
         threat_name = threat.get('name', 'Unknown')
         description = threat.get('description', '')
-        
+
         # Build input for agent
         if threat_type == 'vulnerability':
             severity = threat.get('x_severity', 'UNKNOWN')
             cvss = threat.get('x_cvss_score', 'N/A')
-            
+
             agent_input = f"""
             Analyze this vulnerability:
             Name: {threat_name}
             Description: {description[:300]}
             Severity: {severity}
             CVSS Score: {cvss}
-            
+
             Use tools to determine if this affects our organization.
             Provide a JSON risk assessment.
             """
@@ -275,46 +275,74 @@ class AutonomousCorrelationAgent:
             Analyze this threat indicator:
             Name: {threat_name}
             Description: {description[:300]}
-            
+
             Use tools to determine if this threat is relevant to us.
             Provide a JSON risk assessment.
             """
-        
+
         try:
             # Run the agent
             result = self.agent.invoke({"input": agent_input})
-            
+
             # Parse the output
             output = result.get('output', '')
-            
+
             # Try to extract JSON from the output
             if '{' in output and '}' in output:
                 json_start = output.index('{')
                 json_end = output.rindex('}') + 1
                 json_str = output[json_start:json_end]
-                assessment = json.loads(json_str)
+                raw_assessment = json.loads(json_str)
             else:
                 # Fallback if no JSON found
-                assessment = {
+                raw_assessment = {
                     "risk_score": 5,
                     "affected_assets": ["Unknown"],
                     "business_impact": "Unable to determine",
                     "reasoning": output[:200]
                 }
-            
-            assessment['threat_id'] = threat_name
-            assessment['threat_type'] = threat_type
-            
+
+            # 🔑 Normalize keys so frontend always gets consistent fields
+            assessment = {
+                "risk_score": raw_assessment.get("Risk Score", raw_assessment.get("risk_score", 0)),
+                "affected_assets": raw_assessment.get("Affected Assets", raw_assessment.get("affected_assets", [])),
+                "business_impact": raw_assessment.get("Business Impact", raw_assessment.get("business_impact", "")),
+                "correlation_reasoning": raw_assessment.get("Reasoning", raw_assessment.get("correlation_reasoning", "")),
+                "mitigation_recommendation": raw_assessment.get(
+                    "Mitigation",
+                    raw_assessment.get("mitigation_recommendation", "Implement security controls and monitoring")
+                ),
+                "threat_id": threat_name,
+                "threat_type": threat_type,
+                "description": description
+            }
+
+            # 🎚️ Derive risk_level from risk_score
+            score = assessment["risk_score"] or 0
+            if score >= 8:
+                assessment["risk_level"] = "CRITICAL"
+            elif score >= 6:
+                assessment["risk_level"] = "HIGH"
+            elif score >= 3:
+                assessment["risk_level"] = "MEDIUM"
+            else:
+                assessment["risk_level"] = "LOW"
+
             return assessment
-            
+
         except Exception as e:
             logger.error(f"Agent failed for {threat_name}: {e}")
             return {
                 "threat_id": threat_name,
                 "threat_type": threat_type,
                 "risk_score": 0,
-                "error": str(e)
+                "risk_level": "LOW",
+                "affected_assets": [],
+                "business_impact": "Unknown",
+                "correlation_reasoning": f"Error: {str(e)}",
+                "mitigation_recommendation": "Investigate manually"
             }
+
     
     def correlate_threats(self, threat_landscape: Dict[str, Any]) -> List[Dict[str, Any]]:
         """
@@ -342,7 +370,7 @@ class AutonomousCorrelationAgent:
         
         # Sort by risk score
         risk_assessments.sort(key=lambda x: x.get('risk_score', 0), reverse=True)
-        
+
         logger.info(f"Completed autonomous assessment: {len(risk_assessments)} risks identified")
         return risk_assessments
     
