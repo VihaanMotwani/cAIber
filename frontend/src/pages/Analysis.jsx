@@ -38,7 +38,7 @@ const Analysis = () => {
       <div className="flex items-center justify-center min-h-[60vh]">
         <div className="text-center">
           <Shield className="w-16 h-16 mx-auto text-gray-500 mb-4" />
-          <h2 className="text-2xl font-orbitron text-gray-400">No Analysis Results</h2>
+          <h2 className="text-2xl font-bold text-gray-400">No Analysis Results</h2>
           <p className="text-gray-500 mt-2 font-mono">Run a pipeline analysis first to see results</p>
         </div>
       </div>
@@ -119,7 +119,7 @@ const Analysis = () => {
         initial={{ opacity: 0 }}
         animate={{ opacity: 1 }}
         transition={{ delay: 0.2 }}
-        className="bg-cyber-light/20 backdrop-blur-md rounded-xl p-2 border border-cyber-cyan/30"
+        className="bg-slate-900/20 backdrop-blur-md rounded-xl p-2 border border-blue-400/30"
       >
         <div className="flex space-x-1">
           {tabs.map(tab => {
@@ -129,8 +129,8 @@ const Analysis = () => {
                 key={tab.id}
                 onClick={() => setActiveTab(tab.id)}
                 className={`flex items-center gap-2 px-6 py-3 rounded-lg font-mono font-bold transition-all duration-200 ${activeTab === tab.id
-                  ? 'bg-cyber-cyan text-black shadow-lg shadow-cyber-cyan/25'
-                  : 'text-slate-400 hover:text-slate-200 hover:bg-cyber-dark/50'
+                  ? 'bg-blue-400 text-black shadow-lg shadow-blue-400/25'
+                  : 'text-slate-400 hover:text-slate-200 hover:bg-slate-800/50'
                   }`}
               >
                 <Icon className="w-4 h-4" />
@@ -153,8 +153,8 @@ const Analysis = () => {
           {activeTab === 'overview' && (
             <div className="space-y-6">
               {/* Executive Summary */}
-              <div className="bg-cyber-light/30 backdrop-blur-md rounded-lg p-8 border border-cyber-green/30">
-                <h2 className="text-2xl font-orbitron text-cyber-green mb-6 flex items-center gap-3">
+              <div className="bg-slate-900/30 backdrop-blur-md rounded-lg p-8 border border-purple-400/30">
+                <h2 className="text-2xl font-bold text-purple-400 mb-6 flex items-center gap-3">
                   <Target className="w-6 h-6" />
                   Executive Summary
                 </h2>
@@ -167,40 +167,40 @@ const Analysis = () => {
 
               {/* Quick Stats Grid */}
               <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-                <div className="bg-cyber-light/30 backdrop-blur-md rounded-lg p-6 border border-cyber-red/30">
+                <div className="bg-slate-900/30 backdrop-blur-md rounded-lg p-6 border border-red-400/30">
                   <div className="flex items-center justify-between mb-4">
-                    <h3 className="font-orbitron text-cyber-red">Threat Distribution</h3>
-                    <AlertTriangle className="w-6 h-6 text-cyber-red" />
+                    <h3 className="font-bold text-red-400">Threat Distribution</h3>
+                    <AlertTriangle className="w-6 h-6 text-red-400" />
                   </div>
                   <div className="space-y-3">
                     <div className="flex justify-between items-center">
                       <span className="font-mono text-sm">CVE Vulnerabilities</span>
-                      <span className="font-bold text-cyber-red">{vulnerabilities.length}</span>
+                      <span className="font-bold text-red-400">{vulnerabilities.length}</span>
                     </div>
                     <div className="flex justify-between items-center">
                       <span className="font-mono text-sm">IOC Indicators</span>
-                      <span className="font-bold text-cyber-yellow">{indicators.length}</span>
+                      <span className="font-bold text-yellow-400">{indicators.length}</span>
                     </div>
                     <div className="flex justify-between items-center">
                       <span className="font-mono text-sm">GitHub Advisories</span>
-                      <span className="font-bold text-cyber-purple">{github_advisories.length}</span>
+                      <span className="font-bold text-purple-500">{github_advisories.length}</span>
                     </div>
                   </div>
                 </div>
 
-                <div className="bg-cyber-light/30 backdrop-blur-md rounded-lg p-6 border border-cyber-purple/30">
+                <div className="bg-slate-900/30 backdrop-blur-md rounded-lg p-6 border border-purple-500/30">
                   <div className="flex items-center justify-between mb-4">
-                    <h3 className="font-orbitron text-cyber-purple">Risk Levels</h3>
-                    <Shield className="w-6 h-6 text-cyber-purple" />
+                    <h3 className="font-bold text-purple-500">Risk Levels</h3>
+                    <Shield className="w-6 h-6 text-purple-500" />
                   </div>
                   <div className="space-y-3">
                     {['CRITICAL', 'HIGH', 'MEDIUM', 'LOW'].map(level => {
                       const count = riskAssessments.filter(r => r.risk_level === level).length
                       const colors = {
-                        CRITICAL: 'text-cyber-red',
-                        HIGH: 'text-cyber-yellow',
-                        MEDIUM: 'text-cyber-blue',
-                        LOW: 'text-cyber-green'
+                        CRITICAL: 'text-red-400',
+                        HIGH: 'text-yellow-400',
+                        MEDIUM: 'text-blue-500',
+                        LOW: 'text-purple-400'
                       }
                       return (
                         <div key={level} className="flex justify-between items-center">
@@ -212,19 +212,19 @@ const Analysis = () => {
                   </div>
                 </div>
 
-                <div className="bg-cyber-light/30 backdrop-blur-md rounded-lg p-6 border border-cyber-cyan/30">
+                <div className="bg-slate-900/30 backdrop-blur-md rounded-lg p-6 border border-blue-400/30">
                   <div className="flex items-center justify-between mb-4">
-                    <h3 className="font-orbitron text-cyber-cyan">Coverage Analysis</h3>
-                    <Database className="w-6 h-6 text-cyber-cyan" />
+                    <h3 className="font-bold text-blue-400">Coverage Analysis</h3>
+                    <Database className="w-6 h-6 text-blue-400" />
                   </div>
                   <div className="space-y-3">
                     <div className="flex justify-between items-center">
                       <span className="font-mono text-sm">Data Sources</span>
-                      <span className="font-bold text-cyber-cyan">3</span>
+                      <span className="font-bold text-blue-400">3</span>
                     </div>
                     <div className="flex justify-between items-center">
                       <span className="font-mono text-sm">Intel Feeds</span>
-                      <span className="font-bold text-cyber-green">Active</span>
+                      <span className="font-bold text-purple-400">Active</span>
                     </div>
                     <div className="flex justify-between items-center">
                       <span className="font-mono text-sm">Last Updated</span>
@@ -239,9 +239,9 @@ const Analysis = () => {
           {activeTab === 'threats' && (
             <div className="space-y-6">
               {/* CVE Vulnerabilities */}
-              <div className="bg-cyber-light/30 backdrop-blur-md rounded-lg border border-cyber-red/30">
-                <div className="p-6 border-b border-cyber-red/20">
-                  <h2 className="text-2xl font-orbitron text-cyber-red flex items-center gap-3">
+              <div className="bg-slate-900/30 backdrop-blur-md rounded-lg border border-red-400/30">
+                <div className="p-6 border-b border-red-400/20">
+                  <h2 className="text-2xl font-bold text-red-400 flex items-center gap-3">
                     <Bug className="w-6 h-6" />
                     CVE Vulnerabilities ({vulnerabilities.length})
                   </h2>
@@ -255,10 +255,10 @@ const Analysis = () => {
                   ) : (
                     <div className="space-y-4 max-h-96 overflow-y-auto">
                       {vulnerabilities.slice(0, 10).map((vuln, idx) => (
-                        <div key={idx} className="bg-cyber-dark/50 rounded-lg p-4 border border-cyber-red/20 hover:border-cyber-red/40 transition-colors">
+                        <div key={idx} className="bg-slate-800/50 rounded-lg p-4 border border-red-400/20 hover:border-red-400/40 transition-colors">
                           <div className="flex items-start justify-between mb-3">
                             <div>
-                              <h4 className="font-mono text-cyber-red font-bold">{vuln.cve_id}</h4>
+                              <h4 className="font-mono text-red-400 font-bold">{vuln.cve_id}</h4>
                               <div className="flex items-center gap-4 mt-1">
                                 <span className={`px-2 py-1 rounded text-xs font-mono ${parseFloat(vuln.cvss_score) >= 9 ? 'bg-red-900/50 text-red-300 border border-red-700/50' :
                                   parseFloat(vuln.cvss_score) >= 7 ? 'bg-orange-900/50 text-orange-300 border border-orange-700/50' :
@@ -272,7 +272,7 @@ const Analysis = () => {
                             </div>
                             {vuln.reference_url && (
                               <a href={vuln.reference_url} target="_blank" rel="noopener noreferrer"
-                                className="text-cyber-cyan hover:text-cyber-blue transition-colors">
+                                className="text-blue-400 hover:text-blue-500 transition-colors">
                                 <ExternalLink className="w-4 h-4" />
                               </a>
                             )}
@@ -291,9 +291,9 @@ const Analysis = () => {
               </div>
 
               {/* OTX Indicators */}
-              <div className="bg-cyber-light/30 backdrop-blur-md rounded-lg border border-cyber-yellow/30">
-                <div className="p-6 border-b border-cyber-yellow/20">
-                  <h2 className="text-2xl font-orbitron text-cyber-yellow flex items-center gap-3">
+              <div className="bg-slate-900/30 backdrop-blur-md rounded-lg border border-yellow-400/30">
+                <div className="p-6 border-b border-yellow-400/20">
+                  <h2 className="text-2xl font-bold text-yellow-400 flex items-center gap-3">
                     <Eye className="w-6 h-6" />
                     Threat Indicators ({indicators.length})
                   </h2>
@@ -307,14 +307,14 @@ const Analysis = () => {
                   ) : (
                     <div className="space-y-3 max-h-96 overflow-y-auto">
                       {indicators.slice(0, 10).map((indicator, idx) => (
-                        <div key={idx} className="bg-cyber-dark/50 rounded-lg p-4 border border-cyber-yellow/20">
+                        <div key={idx} className="bg-slate-800/50 rounded-lg p-4 border border-yellow-400/20">
                           <div className="flex items-center justify-between mb-2">
                             <div className="flex items-center gap-3">
-                              <span className="px-3 py-1 bg-cyber-yellow/20 border border-cyber-yellow/50 rounded-full text-xs font-mono text-cyber-yellow">
+                              <span className="px-3 py-1 bg-yellow-400/20 border border-yellow-400/50 rounded-full text-xs font-mono text-yellow-400">
                                 {indicator.type || 'INDICATOR'}
                               </span>
                               <span className="font-mono text-sm text-gray-300">
-                                {indicator.indicator || indicator.pulse || 'Unknown'}
+                                {indicator.indicator || 'Unknown IOC'}
                               </span>
                             </div>
                             <span className="text-xs text-gray-500">
@@ -339,9 +339,9 @@ const Analysis = () => {
               </div>
 
               {/* GitHub Advisories */}
-              <div className="bg-cyber-light/30 backdrop-blur-md rounded-lg border border-cyber-purple/30">
-                <div className="p-6 border-b border-cyber-purple/20">
-                  <h2 className="text-2xl font-orbitron text-cyber-purple flex items-center gap-3">
+              <div className="bg-slate-900/30 backdrop-blur-md rounded-lg border border-purple-500/30">
+                <div className="p-6 border-b border-purple-500/20">
+                  <h2 className="text-2xl font-bold text-purple-500 flex items-center gap-3">
                     <Github className="w-6 h-6" />
                     Security Advisories ({github_advisories.length})
                   </h2>
@@ -355,10 +355,10 @@ const Analysis = () => {
                   ) : (
                     <div className="space-y-4 max-h-96 overflow-y-auto">
                       {github_advisories.slice(0, 10).map((advisory, idx) => (
-                        <div key={idx} className="bg-cyber-dark/50 rounded-lg p-4 border border-cyber-purple/20">
+                        <div key={idx} className="bg-slate-800/50 rounded-lg p-4 border border-purple-500/20">
                           <div className="flex items-start justify-between mb-3">
                             <div>
-                              <h4 className="font-mono text-cyber-purple font-bold">{advisory.ghsa_id}</h4>
+                              <h4 className="font-mono text-purple-500 font-bold">{advisory.ghsa_id}</h4>
                               <div className="flex items-center gap-3 mt-1">
                                 <span className={`px-2 py-1 rounded text-xs font-mono ${advisory.severity === 'critical' ? 'bg-red-900/50 text-red-300 border border-red-700/50' :
                                   advisory.severity === 'high' ? 'bg-orange-900/50 text-orange-300 border border-orange-700/50' :
@@ -372,7 +372,7 @@ const Analysis = () => {
                             </div>
                             {advisory.html_url && (
                               <a href={advisory.html_url} target="_blank" rel="noopener noreferrer"
-                                className="text-cyber-cyan hover:text-cyber-blue transition-colors">
+                                className="text-blue-400 hover:text-blue-500 transition-colors">
                                 <ExternalLink className="w-4 h-4" />
                               </a>
                             )}
@@ -381,7 +381,7 @@ const Analysis = () => {
                           {advisory.affected_packages && (
                             <div className="flex flex-wrap gap-1">
                               {advisory.affected_packages.slice(0, 5).map((pkg, i) => (
-                                <span key={i} className="px-2 py-1 bg-cyber-purple/20 text-cyber-purple text-xs rounded font-mono">
+                                <span key={i} className="px-2 py-1 bg-purple-500/20 text-purple-500 text-xs rounded font-mono">
                                   {pkg}
                                 </span>
                               ))}
@@ -405,9 +405,9 @@ const Analysis = () => {
           )}
 
           {activeTab === 'risks' && (
-            <div className="bg-cyber-light/30 backdrop-blur-md rounded-lg border border-cyber-red/30">
-              <div className="p-6 border-b border-cyber-red/20">
-                <h2 className="text-2xl font-orbitron text-cyber-red flex items-center gap-3">
+            <div className="bg-slate-900/30 backdrop-blur-md rounded-lg border border-red-400/30">
+              <div className="p-6 border-b border-red-400/20">
+                <h2 className="text-2xl font-bold text-red-400 flex items-center gap-3">
                   <Shield className="w-6 h-6" />
                   Risk Assessment ({riskAssessments.length})
                 </h2>
@@ -422,10 +422,10 @@ const Analysis = () => {
                 ) : (
                   <div className="space-y-4">
                     {riskAssessments.map((assessment, idx) => (
-                      <div key={idx} className="bg-cyber-dark/50 rounded-lg p-6 border border-cyber-red/20">
+                      <div key={idx} className="bg-slate-800/50 rounded-lg p-6 border border-red-400/20">
                         <div className="flex items-start justify-between mb-4">
                           <div>
-                            <h3 className="font-bold text-xl text-cyber-yellow mb-2">
+                            <h3 className="font-bold text-xl text-yellow-400 mb-2">
                               {assessment.threat_actor || assessment.vulnerability || 'Unknown Threat'}
                             </h3>
                             <p className="text-gray-300">
@@ -442,20 +442,20 @@ const Analysis = () => {
                         </div>
 
                         <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-4">
-                          <div className="bg-cyber-light/20 rounded-lg p-4">
-                            <h4 className="text-sm font-mono text-cyber-cyan mb-2">AFFECTED ASSETS</h4>
+                          <div className="bg-slate-900/20 rounded-lg p-4">
+                            <h4 className="text-sm font-mono text-blue-400 mb-2">AFFECTED ASSETS</h4>
                             <p className="text-sm text-gray-300">
                               {assessment.affected_assets?.join(', ') || 'Multiple systems'}
                             </p>
                           </div>
-                          <div className="bg-cyber-light/20 rounded-lg p-4">
-                            <h4 className="text-sm font-mono text-cyber-purple mb-2">BUSINESS IMPACT</h4>
+                          <div className="bg-slate-900/20 rounded-lg p-4">
+                            <h4 className="text-sm font-mono text-purple-500 mb-2">BUSINESS IMPACT</h4>
                             <p className="text-sm text-gray-300">
                               {assessment.business_impact || 'Service disruption and data exposure'}
                             </p>
                           </div>
-                          <div className="bg-cyber-light/20 rounded-lg p-4">
-                            <h4 className="text-sm font-mono text-cyber-green mb-2">MITIGATION</h4>
+                          <div className="bg-slate-900/20 rounded-lg p-4">
+                            <h4 className="text-sm font-mono text-purple-400 mb-2">MITIGATION</h4>
                             <p className="text-sm text-gray-300">
                               {assessment.mitigation_recommendation || 'Implement security controls and monitoring'}
                             </p>
@@ -481,9 +481,9 @@ const Analysis = () => {
           {activeTab === 'intelligence' && (
             <div className="space-y-6">
               {/* PIRs Overview */}
-              <div className="bg-cyber-light/30 backdrop-blur-md rounded-lg border border-cyber-purple/30">
-                <div className="p-6 border-b border-cyber-purple/20">
-                  <h2 className="text-2xl font-orbitron text-cyber-purple flex items-center gap-3">
+              <div className="bg-slate-900/30 backdrop-blur-md rounded-lg border border-purple-500/30">
+                <div className="p-6 border-b border-purple-500/20">
+                  <h2 className="text-2xl font-bold text-purple-500 flex items-center gap-3">
                     <FileText className="w-6 h-6" />
                     Priority Intelligence Requirements
                   </h2>
@@ -510,31 +510,31 @@ const Analysis = () => {
                         {
                           title: "Cloud Infrastructure Security",
                           icon: "🔒",
-                          color: "cyber-blue",
+                          color: "blue-500",
                           content: "Focus on vulnerabilities and threat actors targeting cloud service providers, particularly those exploiting supply chain vulnerabilities and those with a history of targeting similar threats in the business strategy for Q3 2024."
                         },
                         {
                           title: "Database Security & Compliance",
                           icon: "🗄️",
-                          color: "cyber-cyan",
+                          color: "blue-400",
                           content: "Intelligence on vulnerabilities and attack patterns targeting NoSQL databases. Emphasize compliance-related threats, such as data exfiltration and unauthorized data access, to ensure adherence to regulatory standards."
                         },
                         {
                           title: "Geographic Expansion Threats",
                           icon: "🌏",
-                          color: "cyber-green",
+                          color: "purple-400",
                           content: "Intelligence gathering on regional threat actors, particularly those known for targeting businesses in Southeast Asia including Malaysia and Singapore, suggest prioritizing intelligence on regional threat actors."
                         },
                         {
                           title: "Containerization Security",
                           icon: "📦",
-                          color: "cyber-yellow",
+                          color: "yellow-400",
                           content: "Focus on container security threats. This includes monitoring for vulnerabilities in container orchestration and runtime environments that could be exploited by attackers to gain unauthorized access or disrupt services."
                         },
                         {
                           title: "Advanced Persistent Threats",
                           icon: "🎯",
-                          color: "cyber-red",
+                          color: "red-400",
                           content: "Intelligence on APT20 group and similar APTs. Prioritize understanding their tactics, techniques, and procedures (TTPs) to anticipate potential future attacks and enhance the organization's defensive posture."
                         }
                       ];
@@ -542,18 +542,18 @@ const Analysis = () => {
                       return (
                         <div className="space-y-4">
                           {sections.map((section, idx) => (
-                            <div key={idx} className={`bg-cyber-dark/50 rounded-lg p-6 border border-${section.color}/30 hover:border-${section.color}/50 transition-colors`}>
+                            <div key={idx} className={`bg-slate-800/50 rounded-lg p-6 border border-${section.color}/30 hover:border-${section.color}/50 transition-colors`}>
                               <div className="flex items-start gap-4">
                                 <div className="text-2xl">{section.icon}</div>
                                 <div className="flex-1">
-                                  <h3 className={`font-orbitron text-lg text-${section.color} mb-3`}>
+                                  <h3 className={`font-bold text-lg text-${section.color} mb-3`}>
                                     PIR #{idx + 1}: {section.title}
                                   </h3>
                                   <p className="text-gray-300 leading-relaxed text-sm">
                                     {section.content}
                                   </p>
                                   <div className="mt-4 flex items-center gap-2">
-                                    <span className={`px-3 py-1 bg-${section.color}/20 border border-${section.color}/50 rounded-full text-xs font-mono text-${section.color}`}>
+                                    <span className={`px-3 py-1 bg-${section.color}/20 border border-${section.color}/50 rounded-full text-xs font-mono tracking-wider text-${section.color}`}>
                                       HIGH PRIORITY
                                     </span>
                                     <span className="text-xs text-gray-500">Q3 2024</span>
@@ -567,7 +567,7 @@ const Analysis = () => {
                     } else {
                       // Fallback to raw display if parsing fails
                       return (
-                        <div className="bg-cyber-dark/50 rounded-lg p-6 border border-gray-700">
+                        <div className="bg-slate-800/50 rounded-lg p-6 border border-gray-700">
                           <div className="prose prose-invert max-w-none">
                             <pre className="whitespace-pre-wrap text-gray-300 font-mono text-sm leading-relaxed">
                               {typeof pirs === 'string' ? pirs : JSON.stringify(pirs, null, 2)}
@@ -582,16 +582,16 @@ const Analysis = () => {
 
               {/* Intelligence Focus Areas */}
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                <div className="bg-cyber-light/30 backdrop-blur-md rounded-lg p-6 border border-cyber-cyan/30">
-                  <h3 className="text-xl font-orbitron text-cyber-cyan mb-4 flex items-center gap-2">
+                <div className="bg-slate-900/30 backdrop-blur-md rounded-lg p-6 border border-blue-400/30">
+                  <h3 className="text-xl font-bold text-blue-400 mb-4 flex items-center gap-2">
                     <Globe className="w-5 h-5" />
                     Geographic Focus
                   </h3>
                   <div className="space-y-3">
                     {['Southeast Asia', 'Malaysia', 'Singapore'].map((geo, idx) => (
-                      <div key={idx} className="flex items-center justify-between p-3 bg-cyber-dark/50 rounded-lg border border-cyber-cyan/20">
+                      <div key={idx} className="flex items-center justify-between p-3 bg-slate-800/50 rounded-lg border border-blue-400/20">
                         <span className="text-sm text-gray-300">{geo}</span>
-                        <span className="px-2 py-1 bg-cyber-cyan/20 text-cyber-cyan text-xs rounded font-mono">
+                        <span className="px-2 py-1 bg-blue-400/20 text-blue-400 text-xs rounded font-mono">
                           ACTIVE
                         </span>
                       </div>
@@ -599,16 +599,16 @@ const Analysis = () => {
                   </div>
                 </div>
 
-                <div className="bg-cyber-light/30 backdrop-blur-md rounded-lg p-6 border border-cyber-yellow/30">
-                  <h3 className="text-xl font-orbitron text-cyber-yellow mb-4 flex items-center gap-2">
+                <div className="bg-slate-900/30 backdrop-blur-md rounded-lg p-6 border border-yellow-400/30">
+                  <h3 className="text-xl font-bold text-yellow-400 mb-4 flex items-center gap-2">
                     <Target className="w-5 h-5" />
                     Threat Actors
                   </h3>
                   <div className="space-y-3">
                     {['APT20', 'Supply Chain Groups', 'Regional Threat Actors'].map((actor, idx) => (
-                      <div key={idx} className="flex items-center justify-between p-3 bg-cyber-dark/50 rounded-lg border border-cyber-yellow/20">
+                      <div key={idx} className="flex items-center justify-between p-3 bg-slate-800/50 rounded-lg border border-yellow-400/20">
                         <span className="text-sm text-gray-300">{actor}</span>
-                        <span className="px-2 py-1 bg-cyber-red/20 text-cyber-red text-xs rounded font-mono">
+                        <span className="px-2 py-1 bg-red-400/20 text-red-400 text-xs rounded font-mono">
                           MONITOR
                         </span>
                       </div>
@@ -619,9 +619,9 @@ const Analysis = () => {
 
               {/* Keywords Section */}
               {results.keywords && (
-                <div className="bg-cyber-light/30 backdrop-blur-md rounded-lg border border-cyber-green/30">
-                  <div className="p-6 border-b border-cyber-green/20">
-                    <h3 className="text-xl font-orbitron text-cyber-green flex items-center gap-2">
+                <div className="bg-slate-900/30 backdrop-blur-md rounded-lg border border-purple-400/30">
+                  <div className="p-6 border-b border-purple-400/20">
+                    <h3 className="text-xl font-bold text-purple-400 flex items-center gap-2">
                       <Database className="w-5 h-5" />
                       Intelligence Keywords & Tags
                     </h3>
@@ -629,8 +629,8 @@ const Analysis = () => {
                   <div className="p-6">
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                       {Object.entries(results.keywords).map(([category, keywords]) => (
-                        <div key={category} className="bg-cyber-dark/50 rounded-lg p-4 border border-cyber-green/20">
-                          <h4 className="text-sm font-mono text-cyber-green uppercase mb-3 flex items-center gap-2">
+                        <div key={category} className="bg-slate-800/50 rounded-lg p-4 border border-purple-400/20">
+                          <h4 className="text-sm font-mono text-purple-400 uppercase mb-3 flex items-center gap-2">
                             {category === 'technologies' && '⚙️'}
                             {category === 'threats' && '⚠️'}
                             {category === 'geographies' && '🗺️'}
@@ -641,7 +641,7 @@ const Analysis = () => {
                             {keywords.map((keyword, idx) => (
                               <span
                                 key={idx}
-                                className="px-3 py-1 bg-cyber-purple/20 border border-cyber-purple/50 rounded-full text-sm font-mono text-cyber-purple hover:bg-cyber-purple/30 transition-colors cursor-pointer"
+                                className="px-3 py-1 bg-purple-500/20 border border-purple-500/50 rounded-full text-sm font-mono text-purple-500 hover:bg-purple-500/30 transition-colors cursor-pointer"
                               >
                                 {keyword}
                               </span>
@@ -655,28 +655,28 @@ const Analysis = () => {
               )}
 
               {/* Intelligence Summary */}
-              <div className="bg-cyber-light/30 backdrop-blur-md rounded-lg p-6 border border-cyber-red/30">
-                <h3 className="text-xl font-orbitron text-cyber-red mb-4 flex items-center gap-2">
+              <div className="bg-slate-900/30 backdrop-blur-md rounded-lg p-6 border border-red-400/30">
+                <h3 className="text-xl font-bold text-red-400 mb-4 flex items-center gap-2">
                   <TrendingUp className="w-5 h-5" />
                   Strategic Intelligence Summary
                 </h3>
-                <div className="bg-cyber-dark/50 rounded-lg p-6 border border-cyber-red/20">
+                <div className="bg-slate-800/50 rounded-lg p-6 border border-red-400/20">
                   <p className="text-gray-300 leading-relaxed mb-4">
-                    The Priority Intelligence Requirements focus on <span className="text-cyber-cyan font-semibold">cloud infrastructure security</span> and
-                    <span className="text-cyber-yellow font-semibold"> regional threat actors</span> targeting Southeast Asian markets.
+                    The Priority Intelligence Requirements focus on <span className="text-blue-400 font-semibold">cloud infrastructure security</span> and
+                    <span className="text-yellow-400 font-semibold"> regional threat actors</span> targeting Southeast Asian markets.
                     Key areas include containerization threats, database vulnerabilities, and APT group monitoring.
                   </p>
                   <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                    <div className="text-center p-3 bg-cyber-light/20 rounded-lg">
-                      <div className="text-2xl font-bold text-cyber-cyan">5</div>
+                    <div className="text-center p-3 bg-slate-900/20 rounded-lg">
+                      <div className="text-2xl font-bold text-blue-400">5</div>
                       <div className="text-xs text-gray-400">Priority Areas</div>
                     </div>
-                    <div className="text-center p-3 bg-cyber-light/20 rounded-lg">
-                      <div className="text-2xl font-bold text-cyber-yellow">3</div>
+                    <div className="text-center p-3 bg-slate-900/20 rounded-lg">
+                      <div className="text-2xl font-bold text-yellow-400">3</div>
                       <div className="text-xs text-gray-400">Geographic Regions</div>
                     </div>
-                    <div className="text-center p-3 bg-cyber-light/20 rounded-lg">
-                      <div className="text-2xl font-bold text-cyber-red">Q3</div>
+                    <div className="text-center p-3 bg-slate-900/20 rounded-lg">
+                      <div className="text-2xl font-bold text-red-400">Q3</div>
                       <div className="text-xs text-gray-400">Target Quarter</div>
                     </div>
                   </div>

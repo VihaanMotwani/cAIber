@@ -112,6 +112,31 @@ class OrganizationalDNAEngine:
             {"id": "tech_nginx", "name": "NGINX", "type": "technology", "confidence": 0.87, "importance": 6, "source_document": "tech_architecture.pdf", "document_type": "technical_architecture"},
             {"id": "tech_elasticsearch", "name": "Elasticsearch", "type": "technology", "confidence": 0.86, "importance": 5, "source_document": "tech_architecture.pdf", "document_type": "technical_architecture"},
             
+            # PLANTED KEYWORDS FOR THREAT DETECTION (SharePoint vulnerabilities)
+            {"id": "tech_sharepoint", "name": "SharePoint Server 2019", "type": "technology", "confidence": 0.94, "importance": 9, "source_document": "sharepoint_deployment.pdf", "document_type": "technical_architecture"},
+            {"id": "tech_sharepoint_2016", "name": "SharePoint Server 2016", "type": "technology", "confidence": 0.89, "importance": 7, "source_document": "legacy_systems.pdf", "document_type": "technical_architecture"},
+            {"id": "tech_iis", "name": "IIS Web Server", "type": "technology", "confidence": 0.91, "importance": 8, "source_document": "web_infrastructure.pdf", "document_type": "technical_architecture"},
+            
+            # PLANTED KEYWORDS FOR GITHUB SECURITY ADVISORIES DETECTION
+            {"id": "tech_spring", "name": "Spring Framework", "type": "technology", "confidence": 0.90, "importance": 8, "source_document": "java_stack.pdf", "document_type": "technical_architecture"},
+            {"id": "tech_log4j", "name": "Apache Log4j", "type": "technology", "confidence": 0.92, "importance": 9, "source_document": "logging_infrastructure.pdf", "document_type": "technical_architecture"},
+            {"id": "tech_apache", "name": "Apache HTTP Server", "type": "technology", "confidence": 0.89, "importance": 7, "source_document": "web_servers.pdf", "document_type": "technical_architecture"},
+            {"id": "tech_tomcat", "name": "Apache Tomcat", "type": "technology", "confidence": 0.88, "importance": 7, "source_document": "application_servers.pdf", "document_type": "technical_architecture"},
+            {"id": "tech_struts", "name": "Apache Struts", "type": "technology", "confidence": 0.85, "importance": 6, "source_document": "java_frameworks.pdf", "document_type": "technical_architecture"},
+            {"id": "tech_jenkins", "name": "Jenkins", "type": "technology", "confidence": 0.87, "importance": 7, "source_document": "cicd_pipeline.pdf", "document_type": "technical_architecture"},
+            {"id": "tech_grafana", "name": "Grafana", "type": "technology", "confidence": 0.86, "importance": 6, "source_document": "monitoring_stack.pdf", "document_type": "technical_architecture"},
+            {"id": "tech_prometheus", "name": "Prometheus", "type": "technology", "confidence": 0.87, "importance": 7, "source_document": "metrics_collection.pdf", "document_type": "technical_architecture"},
+            {"id": "tech_helm", "name": "Helm", "type": "technology", "confidence": 0.84, "importance": 6, "source_document": "kubernetes_tooling.pdf", "document_type": "technical_architecture"},
+            {"id": "tech_istio", "name": "Istio Service Mesh", "type": "technology", "confidence": 0.83, "importance": 6, "source_document": "microservices_architecture.pdf", "document_type": "technical_architecture"},
+            
+            # POPULAR PACKAGES FOR GITHUB ADVISORY DETECTION
+            {"id": "tech_express", "name": "Express.js", "type": "technology", "confidence": 0.91, "importance": 8, "source_document": "nodejs_backend.pdf", "document_type": "technical_architecture"},
+            {"id": "tech_lodash", "name": "Lodash", "type": "technology", "confidence": 0.88, "importance": 6, "source_document": "javascript_libraries.pdf", "document_type": "technical_architecture"},
+            {"id": "tech_django", "name": "Django", "type": "technology", "confidence": 0.89, "importance": 7, "source_document": "python_web_framework.pdf", "document_type": "technical_architecture"},
+            {"id": "tech_flask", "name": "Flask", "type": "technology", "confidence": 0.87, "importance": 7, "source_document": "python_microservices.pdf", "document_type": "technical_architecture"},
+            {"id": "tech_requests", "name": "Python Requests", "type": "technology", "confidence": 0.90, "importance": 7, "source_document": "python_dependencies.pdf", "document_type": "technical_architecture"},
+            {"id": "tech_npm", "name": "NPM Packages", "type": "technology", "confidence": 0.92, "importance": 8, "source_document": "package_management.pdf", "document_type": "technical_architecture"},
+            
             # Business Assets
             {"id": "asset_customer_db", "name": "Customer Database", "type": "business_asset", "confidence": 0.95, "importance": 10, "source_document": "data_inventory.pdf", "document_type": "compliance"},
             {"id": "asset_payment_system", "name": "Payment Processing System", "type": "business_asset", "confidence": 0.94, "importance": 10, "source_document": "system_overview.pdf", "document_type": "technical_architecture"},
@@ -129,6 +154,11 @@ class OrganizationalDNAEngine:
             {"id": "init_security_enhance", "name": "Security Enhancement Program", "type": "business_initiative", "confidence": 0.92, "importance": 9, "source_document": "security_roadmap.pdf", "document_type": "business_strategy"},
             {"id": "init_global_expansion", "name": "Global Expansion", "type": "business_initiative", "confidence": 0.87, "importance": 8, "source_document": "expansion_plan.pdf", "document_type": "business_strategy"},
             
+            # PLANTED GEOGRAPHIC KEYWORDS FOR THREAT DETECTION
+            {"id": "geo_singapore", "name": "Singapore Operations", "type": "geography", "confidence": 0.89, "importance": 8, "source_document": "apac_expansion.pdf", "document_type": "business_strategy"},
+            {"id": "geo_malaysia", "name": "Malaysia Market", "type": "geography", "confidence": 0.87, "importance": 7, "source_document": "southeast_asia_strategy.pdf", "document_type": "business_strategy"},
+            {"id": "init_fintech", "name": "FinTech Innovation Program", "type": "business_initiative", "confidence": 0.90, "importance": 8, "source_document": "fintech_roadmap.pdf", "document_type": "business_strategy"},
+            
             # Compliance Requirements
             {"id": "comp_gdpr", "name": "GDPR", "type": "compliance_requirement", "confidence": 0.95, "importance": 9, "source_document": "compliance_framework.pdf", "document_type": "compliance"},
             {"id": "comp_pci_dss", "name": "PCI-DSS", "type": "compliance_requirement", "confidence": 0.94, "importance": 9, "source_document": "payment_compliance.pdf", "document_type": "compliance"},
@@ -141,6 +171,12 @@ class OrganizationalDNAEngine:
             {"id": "threat_apt28", "name": "APT28 (Fancy Bear)", "type": "threat_actor", "confidence": 0.84, "importance": 8, "source_document": "threat_intelligence.pdf", "document_type": "security_incident"},
             {"id": "threat_lazarus", "name": "Lazarus Group", "type": "threat_actor", "confidence": 0.83, "importance": 7, "source_document": "threat_intelligence.pdf", "document_type": "security_incident"},
             {"id": "threat_ransomware", "name": "Ransomware Groups", "type": "threat_actor", "confidence": 0.86, "importance": 9, "source_document": "ransomware_report.pdf", "document_type": "security_incident"},
+            
+            # PLANTED THREAT ACTORS FOR SHAREPOINT VULNERABILITY DETECTION
+            {"id": "threat_storm2603", "name": "Storm-2603", "type": "threat_actor", "confidence": 0.88, "importance": 9, "source_document": "microsoft_sharepoint_advisory.pdf", "document_type": "security_incident"},
+            {"id": "threat_linen_typhoon", "name": "Linen Typhoon", "type": "threat_actor", "confidence": 0.87, "importance": 8, "source_document": "chinese_apt_analysis.pdf", "document_type": "security_incident"},
+            {"id": "threat_violet_typhoon", "name": "Violet Typhoon", "type": "threat_actor", "confidence": 0.86, "importance": 8, "source_document": "espionage_campaigns.pdf", "document_type": "security_incident"},
+            {"id": "threat_chinese_apt", "name": "Chinese Nation State Actors", "type": "threat_actor", "confidence": 0.85, "importance": 9, "source_document": "geopolitical_threats.pdf", "document_type": "security_incident"},
             
             {"id": "vuln_log4j", "name": "CVE-2021-44228 (Log4j)", "type": "vulnerability", "confidence": 0.95, "importance": 10, "source_document": "vulnerability_assessment.pdf", "document_type": "security_incident"},
             {"id": "vuln_citrix", "name": "CVE-2023-4966 (Citrix Bleed)", "type": "vulnerability", "confidence": 0.93, "importance": 9, "source_document": "vulnerability_assessment.pdf", "document_type": "security_incident"},

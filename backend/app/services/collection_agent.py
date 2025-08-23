@@ -118,7 +118,21 @@ class OTXAgent(BaseAgent):
                             pattern=f"[{stix_type} = '{stix_value}']",
                             description=pulse.get("description", ""),
                         )
-                        relevant_indicators.append(json.loads(stix_indicator.serialize()))
+                        
+                        # Convert to dict and add frontend-friendly fields
+                        stix_dict = json.loads(stix_indicator.serialize())
+                        stix_dict.update({
+                            "type": indicator.get("type", "unknown"),  # Original OTX indicator type
+                            "indicator": indicator.get("indicator", ""),  # Original indicator value
+                            "pulse": pulse.get("name", ""),  # Pulse name for context
+                            "created": indicator.get("created", pulse.get("created", "")),  # Creation date
+                            "pulse_info": {
+                                "name": pulse.get("name", ""),
+                                "description": pulse.get("description", "")[:200] if pulse.get("description") else ""
+                            }
+                        })
+                        
+                        relevant_indicators.append(stix_dict)
                     except Exception as e:
                         print(f"[OTX] Skipped bad indicator {indicator}: {e}")
         return relevant_indicators
@@ -303,9 +317,19 @@ class GitHubSecurityAgent(BaseAgent):
                 )
 
                 vuln_dict = json.loads(stix_vuln.serialize())
-                vuln_dict["x_cvss_score"] = cvss_score
-                vuln_dict["x_severity"] = severity
-                vuln_dict["x_affected_packages"] = affected_packages
+                
+                # Add frontend-friendly fields
+                vuln_dict.update({
+                    "ghsa_id": ghsa_id,
+                    "summary": summary,
+                    "severity": severity.lower() if severity else "unknown",
+                    "published_at": advisory.get("publishedAt", ""),
+                    "html_url": f"https://github.com/advisories/{ghsa_id}",
+                    "affected_packages": affected_packages,
+                    "x_cvss_score": cvss_score,
+                    "x_severity": severity,
+                    "x_affected_packages": affected_packages
+                })
 
                 relevant_advisories.append(vuln_dict)
 
