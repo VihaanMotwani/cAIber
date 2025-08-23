@@ -29,10 +29,10 @@ const ThreatModeling = () => {
         initial={{ opacity: 0, y: -20 }}
         animate={{ opacity: 1, y: 0 }}
       >
-        <h1 className="text-4xl font-orbitron font-bold bg-gradient-to-r from-cyber-red to-cyber-yellow bg-clip-text text-transparent">
+        <h1 className="heading-xl mb-3">
           Threat Modeling & Attack Paths
         </h1>
-        <p className="text-gray-400 mt-2 font-mono">
+        <p className="text-slate-400 text-lg font-medium">
           MITRE ATT&CK and STRIDE analysis of potential attack vectors
         </p>
       </motion.div>
@@ -42,9 +42,9 @@ const ThreatModeling = () => {
         initial={{ opacity: 0 }}
         animate={{ opacity: 1 }}
         transition={{ delay: 0.1 }}
-        className="bg-cyber-light/30 backdrop-blur-md rounded-lg p-6 border border-cyber-red/30"
+        className="card p-6"
       >
-        <h2 className="text-xl font-orbitron text-cyber-red mb-4 flex items-center gap-2">
+        <h2 className="text-xl font-bold text-white mb-4 flex items-center gap-2">
           <Layers className="w-5 h-5" />
           Attack Scenarios ({attackPaths.length})
         </h2>

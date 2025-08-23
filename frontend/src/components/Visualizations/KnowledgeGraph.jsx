@@ -133,7 +133,7 @@ const KnowledgeGraph = ({ graphData, is3D = true }) => {
 
   return (
     <div className="relative w-full h-full">
-      <div id="graph-container" className="w-full h-[600px] bg-slate-900 rounded-xl border border-slate-800">
+      <div id="graph-container" className="w-full h-[600px] bg-slate-900 rounded-xl border border-purple-500/40">
         <Graph
           ref={fgRef}
           graphData={data}

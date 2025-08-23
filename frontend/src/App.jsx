@@ -10,7 +10,7 @@ import Header from './components/Common/Header'
 function App() {
   return (
     <Router>
-      <div className="min-h-screen bg-slate-950 text-slate-200">
+      <div className="min-h-screen text-slate-200">
         <Header />
         
         <main className="container mx-auto px-6 py-8">
@@ -28,21 +28,23 @@ function App() {
           toastOptions={{
             duration: 4000,
             style: {
-              background: '#1e293b',
+              background: 'rgba(15, 4, 32, 0.95)',
               color: '#e2e8f0',
-              border: '1px solid #475569',
-              borderRadius: '8px',
+              border: '1px solid rgba(147, 51, 234, 0.5)',
+              borderRadius: '12px',
+              backdropFilter: 'blur(20px)',
+              boxShadow: '0 8px 32px rgba(0, 0, 0, 0.6), 0 0 16px rgba(147, 51, 234, 0.2)',
             },
             success: {
               iconTheme: {
-                primary: '#10b981',
-                secondary: '#1e293b',
+                primary: '#60a5fa',
+                secondary: 'rgba(15, 4, 32, 0.95)',
               },
             },
             error: {
               iconTheme: {
                 primary: '#ef4444',
-                secondary: '#1e293b',
+                secondary: 'rgba(15, 4, 32, 0.95)',
               },
             },
           }}

@@ -16,14 +16,26 @@ const OrganizationalDNA = () => {
     threats: 0,
     compliance: 0
   })
+  const [riskAssessments, setRiskAssessments] = useState([])
+  const [riskLoading, setRiskLoading] = useState(false)
+  const [keyRelationships, setKeyRelationships] = useState([])
+  const [relationshipsLoading, setRelationshipsLoading] = useState(false)
   const [viewMode, setViewMode] = useState('3d')
+  const [filters, setFilters] = useState({
+    nodeTypes: [],
+    relationshipTypes: [],
+    focusNode: '',
+    depth: 2
+  })
 
   // Always try to fetch data, but handle empty state gracefully
   useEffect(() => {
     fetchGraphData()
-  }, [])
+    fetchRiskAssessments() 
+    fetchKeyRelationships()
+  }, [results])
 
-  const fetchGraphData = async () => {
+  const fetchGraphData = async (customFilters = null) => {
     setLoading(true)
     
     // Define mock data at function scope so it's accessible in both try and catch blocks
@@ -104,9 +116,19 @@ const OrganizationalDNA = () => {
     }
 
     try {
+      // Use custom filters if provided, otherwise use current filters
+      const activeFilters = customFilters || filters
+      
+      // Only pass non-empty filters to API
+      const apiFilters = {}
+      if (activeFilters.nodeTypes.length > 0) apiFilters.nodeTypes = activeFilters.nodeTypes
+      if (activeFilters.relationshipTypes.length > 0) apiFilters.relationshipTypes = activeFilters.relationshipTypes
+      if (activeFilters.focusNode.trim()) apiFilters.focusNode = activeFilters.focusNode.trim()
+      if (activeFilters.depth && activeFilters.depth !== 2) apiFilters.depth = activeFilters.depth
+      
       // Fetch real data from the backend
-      console.log('Fetching organizational DNA...')
-      const graphData = await api.getOrganizationalDNA()
+      console.log('Fetching organizational DNA with filters:', apiFilters)
+      const graphData = await api.getOrganizationalDNA(apiFilters)
       console.log('Received graph data:', graphData)
       
       // Debug: Log what we received
@@ -177,7 +199,129 @@ const OrganizationalDNA = () => {
     }
   }
 
-  // Show empty state only if explicitly no data
+  const fetchRiskAssessments = async () => {
+    setRiskLoading(true)
+    try {
+      // Check if we have results from the pipeline store first
+      if (results?.stage3?.threatLandscape) {
+        console.log('Using threat landscape from pipeline store')
+        const response = await api.correlateThreats(results.stage3.threatLandscape)
+        setRiskAssessments(response.assessments || [])
+      } else {
+        console.log('No threat landscape available, using mock risk data for demo')
+        // Mock risk assessments for demo when pipeline hasn't been run
+        const mockRiskAssessments = [
+          {
+            threat_id: "CVE-2024-AWS-001", 
+            threat_type: "vulnerability",
+            risk_score: 8.5,
+            affected_assets: ["Customer Database", "AWS Infrastructure"],
+            business_impact: "High - Potential data breach affecting customer PII",
+            reasoning: "Critical vulnerability in AWS services directly impacts customer data storage"
+          },
+          {
+            threat_id: "APT-Ransomware-K8s",
+            threat_type: "threat_actor", 
+            risk_score: 7.2,
+            affected_assets: ["Kubernetes Cluster", "Container Registry"],
+            business_impact: "Medium-High - Service disruption and potential data encryption",
+            reasoning: "Ransomware targeting containerized infrastructure poses significant operational risk"
+          },
+          {
+            threat_id: "Supply-Chain-Docker",
+            threat_type: "indicator",
+            risk_score: 6.8,
+            affected_assets: ["Docker Images", "CI/CD Pipeline"],
+            business_impact: "Medium - Compromised deployment pipeline integrity", 
+            reasoning: "Supply chain attacks via container images could introduce malicious code"
+          }
+        ]
+        setRiskAssessments(mockRiskAssessments)
+      }
+    } catch (error) {
+      console.error('Failed to fetch risk assessments:', error)
+      setRiskAssessments([])
+    } finally {
+      setRiskLoading(false)
+    }
+  }
+
+  const fetchKeyRelationships = async () => {
+    setRelationshipsLoading(true)
+    try {
+      // Fetch key relationships directly from Neo4j via the organizational DNA endpoint
+      const response = await api.getOrganizationalDNA({})
+      
+      if (response?.relationships?.length > 0) {
+        // Extract meaningful relationships and categorize by importance
+        const relationshipImportance = {
+          'USES_TECHNOLOGY': 'Critical',
+          'HOSTS': 'Strong',
+          'REQUIRES_COMPLIANCE': 'Required',
+          'PROTECTS': 'Critical',
+          'THREATENS': 'High Risk',
+          'OPERATES_IN': 'Active',
+          'MANAGES': 'Strong',
+          'DEPENDS_ON': 'Critical'
+        }
+        
+        // Group relationships by type and pick representative ones
+        const groupedRels = {}
+        response.relationships.forEach(rel => {
+          if (!groupedRels[rel.relationship_type]) {
+            groupedRels[rel.relationship_type] = []
+          }
+          groupedRels[rel.relationship_type].push(rel)
+        })
+        
+        // Create display relationships from our rigged data
+        const displayRelationships = []
+        
+        // Add most important relationships
+        Object.entries(groupedRels).forEach(([type, rels]) => {
+          if (rels.length > 0 && displayRelationships.length < 5) {
+            const rel = rels[0] // Take first relationship of this type
+            const importance = relationshipImportance[type] || 'Standard'
+            
+            displayRelationships.push({
+              source: rel.source_name || rel.source,
+              target: rel.target_name || rel.target, 
+              relationship: type.replace(/_/g, ' ').toLowerCase(),
+              importance: importance,
+              type: type
+            })
+          }
+        })
+        
+        setKeyRelationships(displayRelationships)
+      } else {
+        // Fallback to mock relationships that match our TechCorp profile
+        const mockRelationships = [
+          { source: 'TechCorp Inc', target: 'AWS', relationship: 'uses technology', importance: 'Critical', type: 'USES_TECHNOLOGY' },
+          { source: 'Customer Database', target: 'GDPR', relationship: 'requires compliance', importance: 'Required', type: 'REQUIRES_COMPLIANCE' },
+          { source: 'Payment System', target: 'PCI DSS', relationship: 'requires compliance', importance: 'Critical', type: 'REQUIRES_COMPLIANCE' },
+          { source: 'Kubernetes', target: 'Docker', relationship: 'depends on', importance: 'Strong', type: 'DEPENDS_ON' },
+          { source: 'APT29', target: 'Customer Database', relationship: 'threatens', importance: 'High Risk', type: 'THREATENS' }
+        ]
+        setKeyRelationships(mockRelationships)
+      }
+    } catch (error) {
+      console.error('Failed to fetch key relationships:', error)
+      // Use TechCorp-aligned mock data
+      const mockRelationships = [
+        { source: 'TechCorp Inc', target: 'AWS', relationship: 'uses technology', importance: 'Critical', type: 'USES_TECHNOLOGY' },
+        { source: 'Customer Database', target: 'GDPR', relationship: 'requires compliance', importance: 'Required', type: 'REQUIRES_COMPLIANCE' },
+        { source: 'Payment System', target: 'PCI DSS', relationship: 'requires compliance', importance: 'Critical', type: 'REQUIRES_COMPLIANCE' },
+        { source: 'Kubernetes', target: 'Docker', relationship: 'depends on', importance: 'Strong', type: 'DEPENDS_ON' },
+        { source: 'APT29', target: 'Customer Database', relationship: 'threatens', importance: 'High Risk', type: 'THREATENS' }
+      ]
+      setKeyRelationships(mockRelationships)
+    } finally {
+      setRelationshipsLoading(false)
+    }
+  }
+
+  // Always try to fetch data, but handle empty state gracefully
   if (!graphData) {
     return (
       <div className="space-y-6">
@@ -227,14 +371,109 @@ const OrganizationalDNA = () => {
         className="flex justify-between items-start"
       >
         <div>
-          <h1 className="text-3xl font-semibold text-gradient">
+          <h1 className="heading-xl mb-3">
             Organizational DNA
           </h1>
-          <p className="text-slate-400 mt-2">
+          <p className="text-slate-400 text-lg font-medium">
             Interactive knowledge graph visualization of your organization's digital ecosystem
           </p>
         </div>
         
+      </motion.div>
+
+      {/* Filter Panel */}
+      <motion.div
+        initial={{ opacity: 0 }}
+        animate={{ opacity: 1 }}
+        transition={{ delay: 0.05 }}
+        className="card p-6"
+      >
+        <div className="flex flex-wrap gap-6 items-center">
+          <div className="flex items-center gap-2">
+            <h3 className="text-base font-semibold text-white">Filters</h3>
+          </div>
+          
+          {/* Node Types Filter */}
+          <div className="flex items-center gap-2">
+            <span className="text-sm font-medium text-slate-400">Node Types:</span>
+            <div className="flex gap-3">
+              {[
+                { type: 'technology', color: '#10b981', label: 'Tech' },
+                { type: 'business_asset', color: '#8b5cf6', label: 'Assets' },
+                { type: 'compliance_requirement', color: '#f59e0b', label: 'Compliance' },
+                { type: 'threat_actor', color: '#ef4444', label: 'Threats' }
+              ].map(item => (
+                <button
+                  key={item.type}
+                  onClick={() => {
+                    const newTypes = filters.nodeTypes.includes(item.type)
+                      ? filters.nodeTypes.filter(t => t !== item.type)
+                      : [...filters.nodeTypes, item.type]
+                    
+                    // Clear relationship filters when selecting node types for cleaner filtering
+                    const newFilters = { ...filters, nodeTypes: newTypes, relationshipTypes: [] }
+                    setFilters(newFilters)
+                    fetchGraphData(newFilters)
+                  }}
+                  className={`px-4 py-2 text-sm font-medium rounded-xl border transition-all duration-200 ${
+                    filters.nodeTypes.includes(item.type)
+                      ? 'text-white shadow-lg transform scale-105'
+                      : 'border-slate-600 text-slate-300 hover:border-slate-500 hover:text-white hover:scale-105'
+                  }`}
+                  style={filters.nodeTypes.includes(item.type) 
+                    ? { backgroundColor: item.color, borderColor: item.color, boxShadow: `0 8px 25px -8px ${item.color}40` }
+                    : {}
+                  }
+                >
+                  {item.label}
+                </button>
+              ))}
+            </div>
+          </div>
+          
+          {/* Relationship Types Filter */}
+          <div className="flex items-center gap-2">
+            <span className="text-sm font-medium text-slate-400">Relationships:</span>
+            <select
+              value={filters.relationshipTypes[0] || ''}
+              onChange={(e) => {
+                const newFilters = { 
+                  ...filters, 
+                  relationshipTypes: e.target.value ? [e.target.value] : [],
+                  // Clear node filters when selecting relationship types for cleaner filtering
+                  nodeTypes: []
+                }
+                setFilters(newFilters)
+                fetchGraphData(newFilters)
+              }}
+              className="px-4 py-2 text-sm bg-slate-800/80 border border-slate-600 rounded-xl text-slate-200 focus:border-emerald-500 focus:outline-none focus:ring-2 focus:ring-emerald-500/20 backdrop-blur-sm transition-all duration-200"
+            >
+              <option value="">All Relationships</option>
+              <option value="USES_TECHNOLOGY">Uses Technology</option>
+              <option value="DEPENDS_ON">Depends On</option>
+              <option value="INTEGRATES_WITH">Integrates With</option>
+              <option value="DEPLOYED_TO">Deployed To</option>
+              <option value="OPERATES_IN">Operates In</option>
+              <option value="PARTNERS_WITH">Partners With</option>
+              <option value="TARGETS">Targets</option>
+              <option value="SUPPORTS">Supports</option>
+              <option value="REQUIRES">Requires</option>
+            </select>
+          </div>
+          
+          
+          {/* Reset Filters */}
+          <button
+            onClick={() => {
+              const resetFilters = { nodeTypes: [], relationshipTypes: [], focusNode: '', depth: 2 }
+              setFilters(resetFilters)
+              fetchGraphData(resetFilters)
+            }}
+            className="px-4 py-2 text-sm border border-slate-600 text-slate-400 hover:border-emerald-500 hover:text-emerald-400 rounded-xl transition-all duration-200 hover:scale-105"
+          >
+            Reset
+          </button>
+        </div>
       </motion.div>
 
       {/* Stats Cards */}
@@ -333,38 +572,105 @@ const OrganizationalDNA = () => {
       >
         <div className="card p-6">
           <h3 className="text-lg font-semibold mb-4">Key Relationships</h3>
-          <div className="space-y-3">
-            <div className="flex items-center justify-between p-3 bg-slate-800/50 rounded-lg">
-              <span className="text-sm">Cloud Infrastructure → Critical Assets</span>
-              <span className="badge badge-primary">Strong</span>
+
+          {relationshipsLoading ? (
+            <div className="flex items-center justify-center py-8">
+              <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary-500"></div>
             </div>
-            <div className="flex items-center justify-between p-3 bg-slate-800/50 rounded-lg">
-              <span className="text-sm">Customer Data → GDPR Compliance</span>
-              <span className="badge badge-primary">Required</span>
+          ) : keyRelationships.length > 0 ? (
+            <div className="space-y-3">
+              {keyRelationships.slice(0, 5).map((rel, index) => {
+                const getBadgeColor = (importance) => {
+                  switch(importance) {
+                    case 'Critical': return 'badge-red'
+                    case 'High Risk': return 'badge-red' 
+                    case 'Required': return 'badge-amber'
+                    case 'Strong': return 'badge-primary'
+                    default: return 'badge-gray'
+                  }
+                }
+                
+                return (
+                  <div key={index} className="flex items-center justify-between p-3 bg-slate-800/50 rounded-lg">
+                    <span className="text-sm">
+                      {rel.source} → {rel.target}
+                    </span>
+                    <div className="flex items-center gap-2">
+                      <span className="text-xs text-slate-500 capitalize">{rel.relationship}</span>
+                      <span className={`badge ${getBadgeColor(rel.importance)}`}>
+                        {rel.importance}
+                      </span>
+                    </div>
+                  </div>
+                )
+              })}
             </div>
-            <div className="flex items-center justify-between p-3 bg-slate-800/50 rounded-lg">
-              <span className="text-sm">Payment System → PCI-DSS</span>
-              <span className="badge badge-primary">Critical</span>
+          ) : (
+            <div className="text-center py-8 text-slate-500">
+              <Network className="w-8 h-8 mx-auto mb-2 opacity-50" />
+              <p className="text-sm">No key relationships found</p>
+              <p className="text-xs mt-1">Build organizational DNA to see relationships</p>
             </div>
-          </div>
+          )}
         </div>
 
         <div className="card p-6">
-          <h3 className="text-lg font-semibold mb-4">Risk Indicators</h3>
-          <div className="space-y-3">
-            <div className="flex items-center justify-between p-3 bg-red-900/20 rounded-lg border border-red-900/30">
-              <span className="text-sm">Ransomware → Customer Database</span>
-              <span className="text-red-400 text-xs font-medium">HIGH RISK</span>
+          <h3 className="text-lg font-semibold mb-4">Risk Assessments</h3>
+          
+          {riskLoading ? (
+            <div className="flex items-center justify-center py-8">
+              <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary-500"></div>
             </div>
-            <div className="flex items-center justify-between p-3 bg-amber-900/20 rounded-lg border border-amber-900/30">
-              <span className="text-sm">Supply Chain → Docker Dependencies</span>
-              <span className="text-amber-400 text-xs font-medium">MEDIUM RISK</span>
+          ) : riskAssessments.length > 0 ? (
+            <div className="space-y-3">
+              {riskAssessments.slice(0, 5).map((assessment, index) => {
+                const getRiskColor = (score) => {
+                  if (score >= 8) return 'red'
+                  if (score >= 6) return 'amber' 
+                  return 'emerald'
+                }
+                const getRiskLabel = (score) => {
+                  if (score >= 8) return 'HIGH RISK'
+                  if (score >= 6) return 'MEDIUM RISK'
+                  return 'LOW RISK'
+                }
+                
+                const riskColor = getRiskColor(assessment.risk_score)
+                const riskLabel = getRiskLabel(assessment.risk_score)
+                
+                return (
+                  <div 
+                    key={assessment.threat_id || index}
+                    className={`p-3 bg-${riskColor}-900/20 rounded-lg border border-${riskColor}-900/30`}
+                    title={assessment.reasoning}
+                  >
+                    <div className="flex items-center justify-between mb-2">
+                      <span className="text-sm font-medium">{assessment.threat_id}</span>
+                      <div className="flex items-center gap-2">
+                        <span className={`text-${riskColor}-400 text-xs font-medium`}>
+                          {riskLabel} ({assessment.risk_score}/10)
+                        </span>
+                      </div>
+                    </div>
+                    <div className="text-xs text-slate-400 mb-1">
+                      <strong>Assets:</strong> {Array.isArray(assessment.affected_assets) 
+                        ? assessment.affected_assets.join(', ') 
+                        : assessment.affected_assets}
+                    </div>
+                    <div className="text-xs text-slate-500 truncate">
+                      {assessment.business_impact}
+                    </div>
+                  </div>
+                )
+              })}
             </div>
-            <div className="flex items-center justify-between p-3 bg-amber-900/20 rounded-lg border border-amber-900/30">
-              <span className="text-sm">Phishing → Auth Service</span>
-              <span className="text-amber-400 text-xs font-medium">MEDIUM RISK</span>
+          ) : (
+            <div className="text-center py-8 text-slate-500">
+              <AlertCircle className="w-8 h-8 mx-auto mb-2 opacity-50" />
+              <p className="text-sm">No risk assessments available</p>
+              <p className="text-xs mt-1">Run the full pipeline to generate threat correlations</p>
             </div>
-          </div>
+          )}
         </div>
       </motion.div>
     </div>

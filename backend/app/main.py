@@ -4,7 +4,7 @@ import os
 from tempfile import NamedTemporaryFile
 from pathlib import Path
 from dotenv import load_dotenv
-from typing import Dict, List
+from typing import Dict, List, Optional
 from .services.organisational_dna_builder import OrganizationalDNAEngine
 from .services.knowledge_graph_builder import KnowledgeGraphBuilder
 from neo4j import GraphDatabase
@@ -222,10 +222,21 @@ def generate_pirs(payload: dict = Body(...)):
 
 
 @app.get("/api/organizational-dna", status_code=200)
-def get_organizational_dna():
+def get_organizational_dna(
+    node_types: Optional[List[str]] = Query(None, description="Filter by node types (e.g., technology, business_asset)"),
+    relationship_types: Optional[List[str]] = Query(None, description="Filter by relationship types (e.g., USES_TECHNOLOGY, HOSTS)"),
+    focus_node: Optional[str] = Query(None, description="Focus on specific node and its connections"),
+    depth: Optional[int] = Query(None, description="Relationship depth for focus_node (default: 2)")
+):
     """
-    Get the organizational DNA knowledge graph from Neo4j.
+    Get the organizational DNA knowledge graph from Neo4j with optional filtering.
     Returns nodes and relationships in a format suitable for visualization.
+    
+    Parameters:
+    - node_types: List of entity types to include
+    - relationship_types: List of relationship types to include  
+    - focus_node: Show only nodes connected to this entity
+    - depth: How many relationship hops to include (when using focus_node)
     """
     try:
         # Use global Neo4j driver
@@ -238,17 +249,107 @@ def get_organizational_dna():
         node_map = {}  # To track unique nodes
         
         with neo4j_driver.session() as session:
-            # Fetch all nodes
-            result = session.run("""
-                MATCH (n:Entity)
-                RETURN n.id AS id, 
-                       n.name AS label, 
-                       n.type AS type,
-                       n.confidence AS confidence,
-                       n.importance AS importance
-                ORDER BY n.confidence DESC
-                LIMIT 200
-            """)
+            # Build dynamic query based on filters
+            query_params = {}
+            
+            if focus_node:
+                # Focus on specific node and its connections
+                depth_limit = depth or 2
+                # Simpler query that gets the focus node and all connected nodes up to depth
+                node_query = f"""
+                    MATCH (focus:Entity)
+                    WHERE focus.name = $focus_node OR focus.id = $focus_node OR focus.label = $focus_node
+                    OPTIONAL MATCH path = (focus)-[*0..{depth_limit}]-(connected:Entity)
+                    WITH DISTINCT connected AS n
+                    WHERE n IS NOT NULL
+                    RETURN n.id AS id,
+                           n.name AS label,
+                           n.type AS type,
+                           n.confidence AS confidence,
+                           n.importance AS importance
+                    ORDER BY n.confidence DESC
+                    LIMIT 200
+                """
+                query_params['focus_node'] = focus_node
+            else:
+                # Standard query with optional node type filtering
+                if node_types and relationship_types:
+                    # Filter by both node types AND relationship types
+                    # Include the filtered nodes AND nodes connected via specified relationships
+                    query_params['node_types'] = node_types
+                    query_params['relationship_types'] = relationship_types
+                    node_query = """
+                        MATCH (n:Entity)
+                        WHERE n.type IN $node_types
+                        OPTIONAL MATCH (n)-[r]-(connected:Entity)
+                        WHERE type(r) IN $relationship_types
+                        WITH COLLECT(DISTINCT n) + COLLECT(DISTINCT connected) AS nodes
+                        UNWIND nodes AS node
+                        WITH DISTINCT node
+                        WHERE node IS NOT NULL
+                        RETURN node.id AS id,
+                               node.name AS label,
+                               node.type AS type,
+                               node.confidence AS confidence,
+                               node.importance AS importance
+                        ORDER BY 
+                            CASE WHEN node.type IN $node_types THEN 0 ELSE 1 END,
+                            node.confidence DESC
+                        LIMIT 200
+                    """
+                elif node_types:
+                    # Only node type filtering - show filtered nodes and ALL their connections
+                    query_params['node_types'] = node_types
+                    node_query = """
+                        MATCH (n:Entity)
+                        WHERE n.type IN $node_types
+                        OPTIONAL MATCH (n)-[r]-(connected:Entity)
+                        WITH COLLECT(DISTINCT n) + COLLECT(DISTINCT connected) AS nodes
+                        UNWIND nodes AS node
+                        WITH DISTINCT node
+                        WHERE node IS NOT NULL
+                        RETURN node.id AS id,
+                               node.name AS label,
+                               node.type AS type,
+                               node.confidence AS confidence,
+                               node.importance AS importance
+                        ORDER BY 
+                            CASE WHEN node.type IN $node_types THEN 0 ELSE 1 END,
+                            node.confidence DESC
+                        LIMIT 200
+                    """
+                elif relationship_types:
+                    # Only relationship type filtering - show nodes connected by specific relationships
+                    query_params['relationship_types'] = relationship_types
+                    node_query = """
+                        MATCH (n:Entity)-[r]-(connected:Entity)
+                        WHERE type(r) IN $relationship_types
+                        WITH COLLECT(DISTINCT n) + COLLECT(DISTINCT connected) AS nodes
+                        UNWIND nodes AS node
+                        WITH DISTINCT node
+                        WHERE node IS NOT NULL
+                        RETURN node.id AS id,
+                               node.name AS label,
+                               node.type AS type,
+                               node.confidence AS confidence,
+                               node.importance AS importance
+                        ORDER BY node.confidence DESC
+                        LIMIT 200
+                    """
+                else:
+                    # No filtering - return all nodes
+                    node_query = """
+                        MATCH (n:Entity)
+                        RETURN n.id AS id, 
+                               n.name AS label, 
+                               n.type AS type,
+                               n.confidence AS confidence,
+                               n.importance AS importance
+                        ORDER BY n.confidence DESC
+                        LIMIT 200
+                    """
+            
+            result = session.run(node_query, query_params)
             
             # Define color mapping for different entity types
             color_map = {
@@ -282,16 +383,27 @@ def get_organizational_dna():
                 nodes.append(node)
                 node_map[node_id] = node
             
-            # Fetch relationships
-            result = session.run("""
+            # Build relationship query with filtering
+            rel_where_clauses = ["source.id IN $node_ids", "target.id IN $node_ids"]
+            if relationship_types:
+                rel_where_clauses.append("type(r) IN $relationship_types")
+                query_params['relationship_types'] = relationship_types
+            
+            query_params['node_ids'] = list(node_map.keys())
+            
+            rel_where_clause = " AND ".join(rel_where_clauses)
+            
+            relationship_query = f"""
                 MATCH (source:Entity)-[r]->(target:Entity)
-                WHERE source.id IN $node_ids AND target.id IN $node_ids
+                WHERE {rel_where_clause}
                 RETURN source.id AS source, 
                        target.id AS target, 
                        type(r) AS relationship_type,
                        r.confidence AS confidence
                 LIMIT 500
-            """, node_ids=list(node_map.keys()))
+            """
+            
+            result = session.run(relationship_query, query_params)
             
             for record in result:
                 source_id = record['source']

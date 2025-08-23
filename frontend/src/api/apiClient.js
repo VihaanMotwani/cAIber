@@ -79,9 +79,30 @@ export const api = {
     return res.data
   },
 
-  // Get Organizational DNA Graph
-  getOrganizationalDNA: async () => {
-    const response = await apiClient.get('/api/organizational-dna')
+  // Get Organizational DNA Graph with optional filters
+  getOrganizationalDNA: async (filters = {}) => {
+    const params = new URLSearchParams()
+    
+    if (filters.nodeTypes && filters.nodeTypes.length > 0) {
+      filters.nodeTypes.forEach(type => params.append('node_types', type))
+    }
+    
+    if (filters.relationshipTypes && filters.relationshipTypes.length > 0) {
+      filters.relationshipTypes.forEach(type => params.append('relationship_types', type))
+    }
+    
+    if (filters.focusNode) {
+      params.append('focus_node', filters.focusNode)
+    }
+    
+    if (filters.depth) {
+      params.append('depth', filters.depth)
+    }
+    
+    const queryString = params.toString()
+    const url = queryString ? `/api/organizational-dna?${queryString}` : '/api/organizational-dna'
+    
+    const response = await apiClient.get(url)
     return response.data
   },
 }

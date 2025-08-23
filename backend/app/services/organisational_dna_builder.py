@@ -44,8 +44,17 @@ class OrganizationalDNAEngine:
 
         print("\n🔍 Extracting entities and relationships...")
         extraction_result = self.entity_extractor.extract_entities_and_relationships(documents)
-        entities = extraction_result['entities']
-        relationships = extraction_result['relationships']
+        
+        # FOR DEMO: Use mock data instead of LLM-extracted entities
+        USE_MOCK_DATA = True  # Toggle this for demo vs real extraction
+        
+        if USE_MOCK_DATA:
+            print("🎭 DEMO MODE: Using curated mock knowledge graph...")
+            entities, relationships = self._get_mock_demo_data()
+        else:
+            entities = extraction_result['entities']
+            relationships = extraction_result['relationships']
+            
         if not entities:
             print("❌ No entities extracted!")
             return
@@ -82,6 +91,125 @@ class OrganizationalDNAEngine:
     def get_dna_summary(self) -> Dict[str, Any]:
         """Return a summary from the graph backend."""
         return self.graph_builder.get_graph_summary()
+
+    def _get_mock_demo_data(self):
+        """Generate realistic mock data for demo purposes."""
+        entities = [
+            # Core Organization
+            {"id": "org_techcorp", "name": "TechCorp Inc", "type": "organization", "confidence": 0.95, "importance": 10, "source_document": "company_overview.pdf", "document_type": "business_strategy"},
+            
+            # Technology Stack (Realistic and balanced)
+            {"id": "tech_aws", "name": "AWS", "type": "technology", "confidence": 0.95, "importance": 9, "source_document": "tech_architecture.pdf", "document_type": "technical_architecture"},
+            {"id": "tech_azure", "name": "Microsoft Azure", "type": "technology", "confidence": 0.90, "importance": 8, "source_document": "tech_architecture.pdf", "document_type": "technical_architecture"},
+            {"id": "tech_kubernetes", "name": "Kubernetes", "type": "technology", "confidence": 0.92, "importance": 8, "source_document": "tech_architecture.pdf", "document_type": "technical_architecture"},
+            {"id": "tech_docker", "name": "Docker", "type": "technology", "confidence": 0.91, "importance": 7, "source_document": "tech_architecture.pdf", "document_type": "technical_architecture"},
+            {"id": "tech_postgresql", "name": "PostgreSQL", "type": "technology", "confidence": 0.93, "importance": 8, "source_document": "tech_architecture.pdf", "document_type": "technical_architecture"},
+            {"id": "tech_mongodb", "name": "MongoDB", "type": "technology", "confidence": 0.88, "importance": 6, "source_document": "tech_architecture.pdf", "document_type": "technical_architecture"},
+            {"id": "tech_redis", "name": "Redis", "type": "technology", "confidence": 0.89, "importance": 6, "source_document": "tech_architecture.pdf", "document_type": "technical_architecture"},
+            {"id": "tech_react", "name": "React", "type": "technology", "confidence": 0.90, "importance": 7, "source_document": "tech_architecture.pdf", "document_type": "technical_architecture"},
+            {"id": "tech_nodejs", "name": "Node.js", "type": "technology", "confidence": 0.91, "importance": 7, "source_document": "tech_architecture.pdf", "document_type": "technical_architecture"},
+            {"id": "tech_python", "name": "Python", "type": "technology", "confidence": 0.92, "importance": 8, "source_document": "tech_architecture.pdf", "document_type": "technical_architecture"},
+            {"id": "tech_nginx", "name": "NGINX", "type": "technology", "confidence": 0.87, "importance": 6, "source_document": "tech_architecture.pdf", "document_type": "technical_architecture"},
+            {"id": "tech_elasticsearch", "name": "Elasticsearch", "type": "technology", "confidence": 0.86, "importance": 5, "source_document": "tech_architecture.pdf", "document_type": "technical_architecture"},
+            
+            # Business Assets
+            {"id": "asset_customer_db", "name": "Customer Database", "type": "business_asset", "confidence": 0.95, "importance": 10, "source_document": "data_inventory.pdf", "document_type": "compliance"},
+            {"id": "asset_payment_system", "name": "Payment Processing System", "type": "business_asset", "confidence": 0.94, "importance": 10, "source_document": "system_overview.pdf", "document_type": "technical_architecture"},
+            {"id": "asset_auth_service", "name": "Authentication Service", "type": "business_asset", "confidence": 0.93, "importance": 9, "source_document": "security_architecture.pdf", "document_type": "technical_architecture"},
+            {"id": "asset_api_gateway", "name": "API Gateway", "type": "business_asset", "confidence": 0.92, "importance": 8, "source_document": "api_documentation.pdf", "document_type": "technical_architecture"},
+            {"id": "asset_data_warehouse", "name": "Data Warehouse", "type": "business_asset", "confidence": 0.90, "importance": 8, "source_document": "data_architecture.pdf", "document_type": "technical_architecture"},
+            {"id": "asset_ml_platform", "name": "ML Platform", "type": "business_asset", "confidence": 0.88, "importance": 7, "source_document": "ml_infrastructure.pdf", "document_type": "technical_architecture"},
+            {"id": "asset_mobile_app", "name": "Mobile Application", "type": "business_asset", "confidence": 0.91, "importance": 8, "source_document": "mobile_strategy.pdf", "document_type": "business_strategy"},
+            {"id": "asset_web_portal", "name": "Web Portal", "type": "business_asset", "confidence": 0.92, "importance": 8, "source_document": "frontend_architecture.pdf", "document_type": "technical_architecture"},
+            
+            # Business Initiatives
+            {"id": "init_digital_transform", "name": "Digital Transformation", "type": "business_initiative", "confidence": 0.90, "importance": 9, "source_document": "strategic_plan.pdf", "document_type": "business_strategy"},
+            {"id": "init_cloud_migration", "name": "Cloud Migration Initiative", "type": "business_initiative", "confidence": 0.88, "importance": 8, "source_document": "cloud_strategy.pdf", "document_type": "business_strategy"},
+            {"id": "init_ai_adoption", "name": "AI/ML Adoption", "type": "business_initiative", "confidence": 0.85, "importance": 7, "source_document": "ai_strategy.pdf", "document_type": "business_strategy"},
+            {"id": "init_security_enhance", "name": "Security Enhancement Program", "type": "business_initiative", "confidence": 0.92, "importance": 9, "source_document": "security_roadmap.pdf", "document_type": "business_strategy"},
+            {"id": "init_global_expansion", "name": "Global Expansion", "type": "business_initiative", "confidence": 0.87, "importance": 8, "source_document": "expansion_plan.pdf", "document_type": "business_strategy"},
+            
+            # Compliance Requirements
+            {"id": "comp_gdpr", "name": "GDPR", "type": "compliance_requirement", "confidence": 0.95, "importance": 9, "source_document": "compliance_framework.pdf", "document_type": "compliance"},
+            {"id": "comp_pci_dss", "name": "PCI-DSS", "type": "compliance_requirement", "confidence": 0.94, "importance": 9, "source_document": "payment_compliance.pdf", "document_type": "compliance"},
+            {"id": "comp_sox", "name": "SOX", "type": "compliance_requirement", "confidence": 0.90, "importance": 7, "source_document": "sox_compliance.pdf", "document_type": "compliance"},
+            {"id": "comp_hipaa", "name": "HIPAA", "type": "compliance_requirement", "confidence": 0.88, "importance": 6, "source_document": "healthcare_compliance.pdf", "document_type": "compliance"},
+            {"id": "comp_iso27001", "name": "ISO 27001", "type": "compliance_requirement", "confidence": 0.91, "importance": 8, "source_document": "iso_certification.pdf", "document_type": "compliance"},
+            
+            # Threat Actors & Vulnerabilities
+            {"id": "threat_apt29", "name": "APT29 (Cozy Bear)", "type": "threat_actor", "confidence": 0.85, "importance": 8, "source_document": "threat_intelligence.pdf", "document_type": "security_incident"},
+            {"id": "threat_apt28", "name": "APT28 (Fancy Bear)", "type": "threat_actor", "confidence": 0.84, "importance": 8, "source_document": "threat_intelligence.pdf", "document_type": "security_incident"},
+            {"id": "threat_lazarus", "name": "Lazarus Group", "type": "threat_actor", "confidence": 0.83, "importance": 7, "source_document": "threat_intelligence.pdf", "document_type": "security_incident"},
+            {"id": "threat_ransomware", "name": "Ransomware Groups", "type": "threat_actor", "confidence": 0.86, "importance": 9, "source_document": "ransomware_report.pdf", "document_type": "security_incident"},
+            
+            {"id": "vuln_log4j", "name": "CVE-2021-44228 (Log4j)", "type": "vulnerability", "confidence": 0.95, "importance": 10, "source_document": "vulnerability_assessment.pdf", "document_type": "security_incident"},
+            {"id": "vuln_citrix", "name": "CVE-2023-4966 (Citrix Bleed)", "type": "vulnerability", "confidence": 0.93, "importance": 9, "source_document": "vulnerability_assessment.pdf", "document_type": "security_incident"},
+            {"id": "vuln_exchange", "name": "CVE-2021-34473 (ProxyShell)", "type": "vulnerability", "confidence": 0.91, "importance": 8, "source_document": "exchange_security.pdf", "document_type": "security_incident"},
+            {"id": "vuln_ssl", "name": "SSL/TLS Vulnerabilities", "type": "vulnerability", "confidence": 0.87, "importance": 6, "source_document": "network_security.pdf", "document_type": "security_incident"},
+            
+            # Key Geographic Locations (Limited and relevant)
+            {"id": "geo_us_east", "name": "US East Region", "type": "geography", "confidence": 0.90, "importance": 8, "source_document": "infrastructure_map.pdf", "document_type": "technical_architecture"},
+            {"id": "geo_eu_west", "name": "EU West Region", "type": "geography", "confidence": 0.89, "importance": 7, "source_document": "infrastructure_map.pdf", "document_type": "technical_architecture"},
+            {"id": "geo_apac", "name": "APAC Region", "type": "geography", "confidence": 0.88, "importance": 6, "source_document": "infrastructure_map.pdf", "document_type": "technical_architecture"},
+            
+            # Key Partner Organizations
+            {"id": "org_aws_partner", "name": "AWS Partner Network", "type": "organization", "confidence": 0.85, "importance": 6, "source_document": "partner_agreements.pdf", "document_type": "business_strategy"},
+            {"id": "org_msft_partner", "name": "Microsoft Partner", "type": "organization", "confidence": 0.84, "importance": 6, "source_document": "partner_agreements.pdf", "document_type": "business_strategy"},
+            {"id": "org_security_vendor", "name": "CrowdStrike", "type": "organization", "confidence": 0.86, "importance": 7, "source_document": "vendor_contracts.pdf", "document_type": "business_strategy"},
+        ]
+        
+        relationships = [
+            # Technology Dependencies
+            {"source": "tech_kubernetes", "target": "tech_docker", "relationship_type": "DEPENDS_ON", "confidence": 0.95, "evidence": "Kubernetes orchestrates Docker containers"},
+            {"source": "tech_react", "target": "tech_nodejs", "relationship_type": "INTEGRATES_WITH", "confidence": 0.90, "evidence": "React frontend connects to Node.js backend"},
+            {"source": "tech_nodejs", "target": "tech_postgresql", "relationship_type": "CONNECTS_TO", "confidence": 0.92, "evidence": "Node.js services use PostgreSQL for data persistence"},
+            {"source": "tech_python", "target": "tech_mongodb", "relationship_type": "CONNECTS_TO", "confidence": 0.88, "evidence": "Python analytics services use MongoDB"},
+            {"source": "tech_nodejs", "target": "tech_redis", "relationship_type": "USES", "confidence": 0.89, "evidence": "Node.js uses Redis for caching"},
+            {"source": "tech_nginx", "target": "tech_nodejs", "relationship_type": "PROXIES_TO", "confidence": 0.87, "evidence": "NGINX proxies requests to Node.js"},
+            
+            # Business Assets using Technologies
+            {"source": "asset_customer_db", "target": "tech_postgresql", "relationship_type": "RUNS_ON", "confidence": 0.94, "evidence": "Customer database runs on PostgreSQL"},
+            {"source": "asset_payment_system", "target": "tech_aws", "relationship_type": "HOSTED_ON", "confidence": 0.93, "evidence": "Payment system hosted on AWS"},
+            {"source": "asset_auth_service", "target": "tech_redis", "relationship_type": "USES", "confidence": 0.90, "evidence": "Auth service uses Redis for session management"},
+            {"source": "asset_api_gateway", "target": "tech_nginx", "relationship_type": "IMPLEMENTED_WITH", "confidence": 0.89, "evidence": "API Gateway implemented with NGINX"},
+            {"source": "asset_data_warehouse", "target": "tech_aws", "relationship_type": "HOSTED_ON", "confidence": 0.91, "evidence": "Data warehouse on AWS Redshift"},
+            {"source": "asset_ml_platform", "target": "tech_python", "relationship_type": "BUILT_WITH", "confidence": 0.88, "evidence": "ML platform built with Python"},
+            {"source": "asset_mobile_app", "target": "tech_react", "relationship_type": "BUILT_WITH", "confidence": 0.87, "evidence": "Mobile app uses React Native"},
+            {"source": "asset_web_portal", "target": "tech_react", "relationship_type": "BUILT_WITH", "confidence": 0.92, "evidence": "Web portal built with React"},
+            
+            # Business Initiatives using Technologies
+            {"source": "init_cloud_migration", "target": "tech_aws", "relationship_type": "USES_TECHNOLOGY", "confidence": 0.91, "evidence": "Cloud migration leverages AWS"},
+            {"source": "init_cloud_migration", "target": "tech_azure", "relationship_type": "USES_TECHNOLOGY", "confidence": 0.88, "evidence": "Multi-cloud strategy includes Azure"},
+            {"source": "init_cloud_migration", "target": "tech_kubernetes", "relationship_type": "ADOPTS", "confidence": 0.90, "evidence": "Cloud migration adopts Kubernetes"},
+            {"source": "init_ai_adoption", "target": "tech_python", "relationship_type": "USES_TECHNOLOGY", "confidence": 0.89, "evidence": "AI initiatives use Python ecosystem"},
+            {"source": "init_ai_adoption", "target": "asset_ml_platform", "relationship_type": "DEVELOPS", "confidence": 0.87, "evidence": "AI adoption develops ML platform"},
+            {"source": "init_digital_transform", "target": "asset_mobile_app", "relationship_type": "DELIVERS", "confidence": 0.86, "evidence": "Digital transformation delivers mobile app"},
+            {"source": "init_security_enhance", "target": "asset_auth_service", "relationship_type": "ENHANCES", "confidence": 0.92, "evidence": "Security program enhances authentication"},
+            
+            # Compliance Requirements
+            {"source": "asset_customer_db", "target": "comp_gdpr", "relationship_type": "MUST_COMPLY_WITH", "confidence": 0.95, "evidence": "Customer data must comply with GDPR"},
+            {"source": "asset_payment_system", "target": "comp_pci_dss", "relationship_type": "MUST_COMPLY_WITH", "confidence": 0.94, "evidence": "Payment system requires PCI-DSS compliance"},
+            {"source": "org_techcorp", "target": "comp_sox", "relationship_type": "SUBJECT_TO", "confidence": 0.90, "evidence": "Public company subject to SOX"},
+            {"source": "asset_data_warehouse", "target": "comp_gdpr", "relationship_type": "MUST_COMPLY_WITH", "confidence": 0.91, "evidence": "Data warehouse must comply with GDPR"},
+            
+            # Threat Relationships
+            {"source": "threat_apt29", "target": "tech_aws", "relationship_type": "TARGETS", "confidence": 0.85, "evidence": "APT29 targets cloud infrastructure"},
+            {"source": "threat_ransomware", "target": "asset_customer_db", "relationship_type": "THREATENS", "confidence": 0.88, "evidence": "Ransomware groups target customer databases"},
+            {"source": "vuln_log4j", "target": "tech_elasticsearch", "relationship_type": "AFFECTS", "confidence": 0.92, "evidence": "Log4j vulnerability affects Elasticsearch"},
+            {"source": "threat_lazarus", "target": "asset_payment_system", "relationship_type": "TARGETS", "confidence": 0.84, "evidence": "Lazarus targets payment systems"},
+            
+            # Geographic Deployments (Limited and meaningful)
+            {"source": "tech_aws", "target": "geo_us_east", "relationship_type": "DEPLOYED_IN", "confidence": 0.90, "evidence": "Primary AWS deployment in US East"},
+            {"source": "tech_azure", "target": "geo_eu_west", "relationship_type": "DEPLOYED_IN", "confidence": 0.89, "evidence": "Azure deployment in EU West"},
+            {"source": "asset_data_warehouse", "target": "geo_us_east", "relationship_type": "LOCATED_IN", "confidence": 0.88, "evidence": "Data warehouse in US East"},
+            
+            # Partner Relationships
+            {"source": "org_techcorp", "target": "org_aws_partner", "relationship_type": "PARTNERS_WITH", "confidence": 0.86, "evidence": "TechCorp is AWS partner"},
+            {"source": "org_techcorp", "target": "org_security_vendor", "relationship_type": "CONTRACTS_WITH", "confidence": 0.87, "evidence": "Security services from CrowdStrike"},
+            {"source": "init_security_enhance", "target": "org_security_vendor", "relationship_type": "ENGAGES", "confidence": 0.85, "evidence": "Security enhancement engages CrowdStrike"},
+        ]
+        
+        return entities, relationships
 
     def validate_build(self) -> bool:
         """Validate that the graph contains data."""

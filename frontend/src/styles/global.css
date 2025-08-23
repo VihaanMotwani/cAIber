@@ -1,3 +1,5 @@
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@300;400;500;600;700&display=swap');
+
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
@@ -5,9 +7,17 @@
 /* Base Styles */
 @layer base {
   body {
-    @apply bg-black text-matrix-green antialiased;
-    font-family: 'Space Mono', 'Courier New', monospace;
-    background: linear-gradient(135deg, #000000 0%, #0d1117 100%);
+    @apply antialiased;
+    font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+    color: #e2e8f0;
+    background: #000000;
+    /* Elegant grid background */
+    background-image: 
+      linear-gradient(rgba(147, 51, 234, 0.15) 1px, transparent 1px),
+      linear-gradient(90deg, rgba(147, 51, 234, 0.15) 1px, transparent 1px);
+    background-size: 40px 40px;
+    background-position: 0 0, 0 0;
+    min-height: 100vh;
   }
 
   /* Professional Scrollbar */
@@ -17,47 +27,92 @@
   }
 
   ::-webkit-scrollbar-track {
-    @apply bg-slate-900;
+    background: #0a0118;
   }
 
   ::-webkit-scrollbar-thumb {
-    @apply bg-slate-700 rounded-full;
+    background: #7c3aed;
+    border-radius: 10px;
   }
 
   ::-webkit-scrollbar-thumb:hover {
-    @apply bg-slate-600;
+    background: #a855f7;
   }
 }
 
 /* Components */
 @layer components {
-  /* Matrix Card */
+  /* Clean Professional Card */
   .card {
-    @apply bg-matrix-darkgray/80 backdrop-blur-sm rounded-xl border border-matrix-darkgreen shadow-xl;
-    box-shadow: 0 0 20px rgba(0, 255, 65, 0.1);
+    background: rgba(15, 4, 32, 0.85) !important;
+    border: 1px solid rgba(147, 51, 234, 0.4) !important;
+    border-radius: 12px;
+    backdrop-filter: blur(15px);
+    box-shadow: 
+      0 8px 32px rgba(0, 0, 0, 0.6),
+      0 0 16px rgba(147, 51, 234, 0.1),
+      inset 0 1px 0 rgba(147, 51, 234, 0.1);
+  }
+  
+  /* Clean card styling */
+  .card, [class*="card"], [class*="bg-slate"], [class*="border-slate"] {
+    background: rgba(15, 4, 32, 0.85) !important;
+    border: 1px solid rgba(147, 51, 234, 0.4) !important;
   }
 
   .card-hover {
-    @apply transition-all duration-300 hover:border-primary-600/50 hover:shadow-2xl hover:shadow-primary-900/20;
+    transition: all 0.3s ease;
+    transform: translateY(0);
+  }
+  
+  .card-hover:hover {
+    transform: translateY(-3px);
+    border-color: rgba(147, 51, 234, 0.8);
+    box-shadow: 
+      0 12px 48px rgba(0, 0, 0, 0.8),
+      0 0 32px rgba(147, 51, 234, 0.3),
+      inset 0 1px 0 rgba(147, 51, 234, 0.2);
   }
 
-  /* Matrix Buttons */
+  /* Elegant Buttons */
   .btn-primary {
-    @apply px-6 py-3 bg-matrix-darkgreen text-black rounded-lg font-mono font-bold transition-all duration-200;
-    @apply hover:bg-matrix-green hover:shadow-lg hover:shadow-matrix-green/50;
-    @apply active:scale-95;
-    border: 1px solid #00ff41;
+    background: linear-gradient(135deg, #7c3aed 0%, #a855f7 100%);
+    color: #ffffff;
+    border: 1px solid #7c3aed;
+    padding: 12px 24px;
+    border-radius: 8px;
+    font-weight: 600;
+    transition: all 0.3s ease;
+    box-shadow: 0 4px 16px rgba(124, 58, 237, 0.4), 0 0 0 0 rgba(124, 58, 237, 0.4);
+  }
+  
+  .btn-primary:hover {
+    background: linear-gradient(135deg, #6d28d9 0%, #9333ea 100%);
+    box-shadow: 0 8px 24px rgba(124, 58, 237, 0.6), 0 0 0 4px rgba(124, 58, 237, 0.1);
+    transform: translateY(-2px);
   }
 
   .btn-secondary {
-    @apply px-6 py-3 bg-black text-matrix-green rounded-lg font-mono font-bold transition-all duration-200;
-    @apply hover:bg-matrix-darkgray hover:shadow-lg hover:shadow-matrix-green/25;
-    @apply active:scale-95 border border-matrix-darkgreen;
+    background: rgba(124, 58, 237, 0.1);
+    color: #a855f7;
+    border: 1px solid #7c3aed;
+    padding: 12px 24px;
+    border-radius: 8px;
+    font-weight: 600;
+    transition: all 0.3s ease;
+    backdrop-filter: blur(10px);
+  }
+  
+  .btn-secondary:hover {
+    background: rgba(124, 58, 237, 0.2);
+    border-color: #a855f7;
+    box-shadow: 0 4px 16px rgba(124, 58, 237, 0.3);
+    transform: translateY(-1px);
   }
 
   /* Status Indicators */
   .status-success {
-    @apply text-teal-400 bg-teal-400/10 border-teal-400/30;
+    @apply text-blue-400 bg-blue-400/10 border-blue-400/30;
   }
 
   .status-warning {
@@ -69,48 +124,175 @@
   }
 
   .status-info {
-    @apply text-primary-400 bg-primary-400/10 border-primary-400/30;
+    @apply text-purple-400 bg-purple-400/10 border-purple-400/30;
   }
 
-  /* Professional Badge */
+  /* Elegant Badge */
   .badge {
-    @apply inline-flex items-center px-3 py-1 rounded-full text-xs font-medium;
-    @apply bg-slate-800 text-slate-300 border border-slate-700;
+    display: inline-flex;
+    align-items: center;
+    padding: 4px 12px;
+    border-radius: 6px;
+    font-size: 11px;
+    font-weight: 600;
+    background: rgba(15, 4, 32, 0.9);
+    color: #a855f7;
+    border: 1px solid #7c3aed;
+    backdrop-filter: blur(10px);
   }
 
   .badge-primary {
-    @apply bg-primary-900/50 text-primary-300 border-primary-700;
+    background: rgba(124, 58, 237, 0.15);
+    color: #a855f7;
+    border-color: #7c3aed;
+  }
+  
+  .badge-red {
+    background: rgba(255, 0, 0, 0.15);
+    color: #ff6b6b;
+    border-color: #dc2626;
+  }
+  
+  .badge-amber {
+    background: rgba(245, 158, 11, 0.15);
+    color: #fbbf24;
+    border-color: #f59e0b;
+  }
+  
+  .badge-gray {
+    background: rgba(148, 163, 184, 0.15);
+    color: #94a3b8;
+    border-color: #64748b;
   }
 
   /* Glass Effect */
   .glass {
-    @apply bg-slate-900/30 backdrop-blur-md border border-slate-800/50;
+    background: rgba(15, 4, 32, 0.4);
+    backdrop-filter: blur(20px);
+    border: 1px solid rgba(147, 51, 234, 0.2);
   }
 
   /* Section Headers */
   .section-header {
-    @apply text-2xl font-semibold text-slate-100 mb-6;
+    @apply text-2xl font-bold text-white mb-6 tracking-tight;
+    font-family: 'Inter', sans-serif;
   }
 
   .section-subtitle {
-    @apply text-sm text-slate-400 font-normal mt-1;
+    @apply text-sm text-slate-400 font-medium mt-1;
   }
+  
+  /* Elegant Typography */
+  .heading-xl {
+    font-size: 2.5rem;
+    font-weight: 700;
+    background: linear-gradient(135deg, #a855f7 0%, #3b82f6 50%, #8b5cf6 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+    text-shadow: 0 0 30px rgba(168, 85, 247, 0.3);
+    letter-spacing: -0.02em;
+  }
+  
+  .heading-lg {
+    font-size: 1.875rem;
+    font-weight: 700;
+    background: linear-gradient(135deg, #a855f7 0%, #3b82f6 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+    text-shadow: 0 0 20px rgba(168, 85, 247, 0.3);
+    letter-spacing: -0.02em;
+  }
+  
+  .text-cyber-accent {
+    color: #a855f7;
+    text-shadow: 0 0 15px rgba(168, 85, 247, 0.4);
+  }
+  
+  .font-mono {
+    font-family: 'JetBrains Mono', 'Fira Code', monospace;
+  }
+}
+
+/* Elegant Color System */
+.text-slate-200, .text-slate-300 {
+  color: #e2e8f0 !important;
+}
+
+.text-slate-400, .text-slate-500 {
+  color: #94a3b8 !important;
+}
+
+.text-slate-600, .text-slate-700, .text-slate-800 {
+  color: #64748b !important;
+}
+
+.bg-slate-800, .bg-slate-900, .bg-slate-950, .bg-slate-800\/50 {
+  background-color: rgba(15, 4, 32, 0.8) !important;
+}
+
+.border-slate-600, .border-slate-700, .border-slate-800 {
+  border-color: rgba(147, 51, 234, 0.4) !important;
+}
+
+/* Accent colors for special elements */
+.text-blue-400, .text-blue-500, .text-blue-600, .text-teal-400, .text-teal-500, .text-primary-500, .text-primary-600 {
+  color: #60a5fa !important;
+}
+
+.text-amber-500 {
+  color: #fbbf24 !important;
+}
+
+.text-red-500 {
+  color: #ef4444 !important;
+}
+
+.bg-teal-900, .bg-blue-900, .bg-teal-900\/20 {
+  background-color: rgba(59, 130, 246, 0.1) !important;
+}
+
+.border-teal-700, .border-blue-700, .border-teal-700\/50 {
+  border-color: rgba(59, 130, 246, 0.4) !important;
+}
+
+/* Ensure all grid items and containers have proper styling */
+div[class*="grid"], div[class*="flex"], div[class*="card"] {
+  --tw-bg-opacity: 1;
+}
+
+/* Professional dashboard cards */
+.grid .card {
+  background: rgba(15, 4, 32, 0.9) !important;
+  border: 1px solid rgba(147, 51, 234, 0.4) !important;
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.4), 0 0 16px rgba(147, 51, 234, 0.1) !important;
 }
 
 /* Utilities */
 @layer utilities {
-  /* Text Gradient */
+  /* Elegant Text Effects */
   .text-gradient {
-    @apply bg-gradient-to-r from-primary-400 to-primary-600 bg-clip-text text-transparent;
+    background: linear-gradient(135deg, #a855f7 0%, #3b82f6 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+    text-shadow: 0 0 20px rgba(168, 85, 247, 0.4);
+  }
+  
+  .text-matrix {
+    color: #a855f7;
+    font-family: 'JetBrains Mono', monospace;
+    text-shadow: 0 0 12px rgba(168, 85, 247, 0.4);
   }
 
-  /* Subtle Glow */
-  .glow-sm {
-    box-shadow: 0 0 20px rgba(14, 165, 233, 0.15);
+  /* Elegant Glows */
+  .glow-matrix {
+    box-shadow: 0 0 24px rgba(147, 51, 234, 0.4);
   }
 
-  .glow-md {
-    box-shadow: 0 0 40px rgba(14, 165, 233, 0.2);
+  .glow-matrix-strong {
+    box-shadow: 0 0 40px rgba(147, 51, 234, 0.6);
   }
 
   /* Loading Animation */
@@ -120,7 +302,7 @@
 
   /* Focus Styles */
   .focus-outline {
-    @apply focus:outline-none focus:ring-2 focus:ring-primary-500/50 focus:border-primary-500;
+    @apply focus:outline-none focus:ring-2 focus:ring-purple-500/50 focus:border-purple-500;
   }
 }
 

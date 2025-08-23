@@ -39,7 +39,7 @@ const SimpleKnowledgeGraph = ({ graphData, onRefresh }) => {
 
   const getNodeColor = (type) => {
     switch (type) {
-      case 'organization': return '#00ff41'
+      case 'organization': return '#60a5fa'
       case 'technology': return '#14b8a6'
       case 'business_asset': return '#8b5cf6'
       case 'asset': return '#8b5cf6'
@@ -67,19 +67,31 @@ const SimpleKnowledgeGraph = ({ graphData, onRefresh }) => {
 
     console.log('SimpleKnowledgeGraph: Rendering with', data.nodes.length, 'nodes and', data.links.length, 'links')
 
-    // Only show nodes that have relationships (connected nodes)
-    const connectedNodeIds = new Set()
-    data.links.forEach(link => {
-      connectedNodeIds.add(link.source)
-      connectedNodeIds.add(link.target)
-    })
+    // Check if this is a filtered view (fewer nodes than normal)
+    const isFiltered = data.nodes.length < 100
     
-    const connectedNodes = data.nodes.filter(node => connectedNodeIds.has(node.id))
-    const connectedLinks = data.links.filter(link => 
-      connectedNodeIds.has(link.source) && connectedNodeIds.has(link.target)
-    )
-
-    console.log('Filtered to connected nodes only:', connectedNodes.length, 'nodes and', connectedLinks.length, 'links')
+    let nodesToRender, linksToRender
+    
+    if (isFiltered) {
+      // For filtered views, show ALL nodes even if not connected
+      // This allows seeing isolated nodes when filtering
+      nodesToRender = data.nodes
+      linksToRender = data.links
+      console.log('Filtered view: showing all', nodesToRender.length, 'nodes')
+    } else {
+      // For full view, only show connected nodes to reduce clutter
+      const connectedNodeIds = new Set()
+      data.links.forEach(link => {
+        connectedNodeIds.add(link.source)
+        connectedNodeIds.add(link.target)
+      })
+      
+      nodesToRender = data.nodes.filter(node => connectedNodeIds.has(node.id))
+      linksToRender = data.links.filter(link => 
+        connectedNodeIds.has(link.source) && connectedNodeIds.has(link.target)
+      )
+      console.log('Full view: filtered to', nodesToRender.length, 'connected nodes only')
+    }
 
     const svg = d3.select(svgRef.current)
     svg.selectAll("*").remove()
@@ -104,8 +116,8 @@ const SimpleKnowledgeGraph = ({ graphData, onRefresh }) => {
     svg.node().zoomBehavior = zoom
 
     // Create simulation
-    const simulation = d3.forceSimulation(connectedNodes)
-      .force("link", d3.forceLink(connectedLinks).id(d => d.id).distance(80))
+    const simulation = d3.forceSimulation(nodesToRender)
+      .force("link", d3.forceLink(linksToRender).id(d => d.id).distance(80))
       .force("charge", d3.forceManyBody().strength(-200))
       .force("center", d3.forceCenter(width / 2, height / 2))
       .force("collision", d3.forceCollide().radius(d => (d.size || 10) + 5))
@@ -113,16 +125,16 @@ const SimpleKnowledgeGraph = ({ graphData, onRefresh }) => {
     // Create links
     const link = container.append("g")
       .selectAll("line")
-      .data(connectedLinks)
+      .data(linksToRender)
       .join("line")
-      .attr("stroke", "#00ff41")
+      .attr("stroke", "#3b82f6")
       .attr("stroke-opacity", 0.4)
       .attr("stroke-width", 1.5)
 
     // Create nodes
     const node = container.append("g")
       .selectAll("g")
-      .data(connectedNodes)
+      .data(nodesToRender)
       .join("g")
       .style("cursor", "pointer")
       .call(d3.drag()
@@ -134,7 +146,7 @@ const SimpleKnowledgeGraph = ({ graphData, onRefresh }) => {
     node.append("circle")
       .attr("r", d => Math.max((d.size || 10) / 2, 8))
       .attr("fill", d => getNodeColor(d.type))
-      .attr("stroke", "#00ff41")
+      .attr("stroke", "#3b82f6")
       .attr("stroke-width", 1.5)
       .on("click", (event, d) => {
         event.stopPropagation()
@@ -148,7 +160,7 @@ const SimpleKnowledgeGraph = ({ graphData, onRefresh }) => {
       .attr("x", 0)
       .attr("y", d => Math.max((d.size || 10) / 2, 8) + 15)
       .attr("text-anchor", "middle")
-      .attr("fill", "#00ff41")
+      .attr("fill", "#60a5fa")
       .attr("font-size", "10px")
       .attr("font-family", "Space Mono, monospace")
       .style("pointer-events", "none")
@@ -220,7 +232,7 @@ const SimpleKnowledgeGraph = ({ graphData, onRefresh }) => {
 
   return (
     <div className="relative w-full h-full">
-      <div className="w-full h-[600px] bg-black rounded-xl border border-matrix-darkgreen relative overflow-hidden">
+      <div className="w-full h-[600px] bg-black rounded-xl border border-blue-500/40 relative overflow-hidden">
         <svg
           ref={svgRef}
           width="100%"
@@ -233,38 +245,38 @@ const SimpleKnowledgeGraph = ({ graphData, onRefresh }) => {
         <div className="absolute top-4 right-4 flex flex-col gap-2">
           <button
             onClick={handleZoomIn}
-            className="p-2 bg-matrix-darkgray hover:bg-matrix-darkgreen rounded-lg transition-colors border border-matrix-darkgreen"
+            className="p-2 bg-blue-900/20 hover:bg-blue-800/30 rounded-lg transition-colors border border-blue-500/40"
             title="Zoom In"
           >
-            <ZoomIn className="w-4 h-4 text-matrix-green" />
+            <ZoomIn className="w-4 h-4 text-blue-400" />
           </button>
           <button
             onClick={handleZoomOut}
-            className="p-2 bg-matrix-darkgray hover:bg-matrix-darkgreen rounded-lg transition-colors border border-matrix-darkgreen"
+            className="p-2 bg-blue-900/20 hover:bg-blue-800/30 rounded-lg transition-colors border border-blue-500/40"
             title="Zoom Out"
           >
-            <ZoomOut className="w-4 h-4 text-matrix-green" />
+            <ZoomOut className="w-4 h-4 text-blue-400" />
           </button>
           <button
             onClick={handleResetZoom}
-            className="p-2 bg-matrix-darkgray hover:bg-matrix-darkgreen rounded-lg transition-colors border border-matrix-darkgreen"
+            className="p-2 bg-blue-900/20 hover:bg-blue-800/30 rounded-lg transition-colors border border-blue-500/40"
             title="Reset Zoom"
           >
-            <RotateCw className="w-4 h-4 text-matrix-green" />
+            <RotateCw className="w-4 h-4 text-blue-400" />
           </button>
           <button
             onClick={handleRefresh}
-            className="p-2 bg-matrix-darkgray hover:bg-matrix-darkgreen rounded-lg transition-colors border border-matrix-darkgreen"
+            className="p-2 bg-blue-900/20 hover:bg-blue-800/30 rounded-lg transition-colors border border-blue-500/40"
             title="Refresh Data"
           >
-            <RefreshCw className="w-4 h-4 text-matrix-green" />
+            <RefreshCw className="w-4 h-4 text-blue-400" />
           </button>
         </div>
 
         {/* Legend */}
         <div className="absolute top-4 left-4">
           <div className="card p-3">
-            <h4 className="text-xs font-mono font-bold text-matrix-green mb-2">NODE TYPES</h4>
+            <h4 className="text-xs font-mono font-bold text-blue-400 mb-2">NODE TYPES</h4>
             <div className="space-y-1">
               {[
                 { type: 'technology', color: '#14b8a6', label: 'TECHNOLOGY' },
@@ -273,8 +285,8 @@ const SimpleKnowledgeGraph = ({ graphData, onRefresh }) => {
                 { type: 'threat_actor', color: '#ef4444', label: 'THREATS' }
               ].map(item => (
                 <div key={item.type} className="flex items-center gap-2">
-                  <div className="w-3 h-3 rounded-full border border-matrix-green" style={{ backgroundColor: item.color }} />
-                  <span className="text-xs text-matrix-green font-mono">{item.label}</span>
+                  <div className="w-3 h-3 rounded-full border border-blue-400" style={{ backgroundColor: item.color }} />
+                  <span className="text-xs text-blue-300 font-mono">{item.label}</span>
                 </div>
               ))}
             </div>
@@ -285,15 +297,15 @@ const SimpleKnowledgeGraph = ({ graphData, onRefresh }) => {
         {selectedNode && (
           <div className="absolute bottom-4 left-4 max-w-sm">
             <div className="card p-4">
-              <h3 className="font-mono font-bold text-matrix-green mb-2">{selectedNode.label}</h3>
+              <h3 className="font-mono font-bold text-blue-400 mb-2">{selectedNode.label}</h3>
               <div className="space-y-1 text-sm">
-                <p><span className="text-matrix-darkgreen">TYPE:</span> <span className="text-matrix-green font-mono">{selectedNode.type.toUpperCase()}</span></p>
-                <p><span className="text-matrix-darkgreen">SIZE:</span> <span className="text-matrix-green font-mono">{selectedNode.size}</span></p>
-                <p><span className="text-matrix-darkgreen">ID:</span> <span className="text-matrix-green font-mono text-xs">{selectedNode.id}</span></p>
+                <p><span className="text-blue-500">TYPE:</span> <span className="text-blue-300 font-mono">{selectedNode.type.toUpperCase()}</span></p>
+                <p><span className="text-blue-500">SIZE:</span> <span className="text-blue-300 font-mono">{selectedNode.size}</span></p>
+                <p><span className="text-blue-500">ID:</span> <span className="text-blue-300 font-mono text-xs">{selectedNode.id}</span></p>
               </div>
               <button 
                 onClick={() => setSelectedNode(null)}
-                className="mt-2 text-xs text-matrix-darkgreen hover:text-matrix-green font-mono"
+                className="mt-2 text-xs text-blue-500 hover:text-blue-300 font-mono"
               >
                 [CLOSE]
               </button>

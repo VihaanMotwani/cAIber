@@ -68,10 +68,10 @@ const Analysis = () => {
         initial={{ opacity: 0, y: -20 }}
         animate={{ opacity: 1, y: 0 }}
       >
-        <h1 className="text-4xl font-orbitron font-bold text-gradient">
+        <h1 className="heading-xl mb-3">
           Threat Analysis Dashboard
         </h1>
-        <p className="text-slate-400 mt-2 font-mono">
+        <p className="text-slate-400 text-lg font-medium">
           Comprehensive intelligence analysis and risk assessment
         </p>
       </motion.div>

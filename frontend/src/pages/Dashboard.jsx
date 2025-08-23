@@ -256,10 +256,10 @@ const Dashboard = () => {
         initial={{ opacity: 0, y: -20 }}
         animate={{ opacity: 1, y: 0 }}
       >
-        <h1 className="text-3xl font-semibold text-gradient mb-2">
+        <h1 className="heading-xl mb-3">
           Threat Intelligence Dashboard
         </h1>
-        <p className="text-slate-400">
+        <p className="text-slate-400 text-lg font-medium">
           Comprehensive threat analysis and risk assessment platform
         </p>
       </motion.div>
@@ -422,7 +422,7 @@ const Dashboard = () => {
         className="card p-8"
       >
         <div className="text-center mb-8">
-          <h2 className="text-2xl font-semibold mb-4">Pipeline Control Center</h2>
+          <h2 className="text-2xl font-bold text-white mb-4">Pipeline Control Center</h2>
 
           <div className="flex justify-center">
             <button
